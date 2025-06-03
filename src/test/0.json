@@ -1,0 +1,30 @@
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+
+    "/comment": "Basic seeding",
+    "db:seed": "bun run src/seed.ts",
+
+    "//comment": "Enhanced seeding options",
+    "db:seed:basic": "bun run src/seed.ts basic",
+    "db:seed:improved": "bun run src/seed.ts improved",
+    "db:seed:advanced": "bun run src/seed.ts advanced",
+    "db:seed:modular": "bun run src/seed.ts modular",
+
+    "_comment": "Specific collection seeding",
+    "db:seed:categories": "bun run src/lib/seed/seeders/categories.ts",
+    "db:seed:users": "bun run src/lib/seed/seeders/users.ts",
+
+    "__comment": "Development helpers",
+    "db:reset": "bun run src/lib/seed/reset.ts",
+    "db:seed:dev": "bun run src/lib/seed/development.ts",
+    "db:seed:prod": "NODE_ENV=production bun run src/seed.ts",
+
+    "-comment": "Validation and testing",
+    "db:validate": "bun run src/lib/seed/validate.ts",
+    "db:seed:dry-run": "DRY_RUN=true bun run src/seed.ts"
+  }
+}
