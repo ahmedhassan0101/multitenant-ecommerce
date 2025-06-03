@@ -27,6 +27,7 @@ export default async function Layout({
   //     ...(doc as Category),
   //   })),
   // }));
+  // console.log("data: 50 50" + JSON.stringify(data, null, 2));
 
   return (
     <section className="flex min-h-screen flex-col">
@@ -35,7 +36,7 @@ export default async function Layout({
       <SearchFilters categories={data.docs} />
       <div className="flex-1 bg-[#f4f4f0]">
         <pre>
-          <code>{JSON.stringify(data, null, 2)}</code>
+          {/* <code>{JSON.stringify(data, null, 2)}</code> */}
         </pre>
         {children}
       </div>
