@@ -21,3 +21,5 @@ export const GET = async () => {
 
   return Response.json(data);
 };
+
+// NOTE =>  we won't use this any more, since we using tRPC API Router 

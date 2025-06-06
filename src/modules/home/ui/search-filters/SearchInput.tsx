@@ -1,22 +1,18 @@
-"use client"
+"use client";
 import { Input } from "@/components/ui/input";
-import { Category } from "@/payload-types";
 import { ListFilterIcon, SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import CategorySidebar from "./CategorySidebar";
 import { Button } from "@/components/ui/button";
-
-export default function SearchInput({
-  categories,
-}: {
-  categories: Category[];
-}) {
+interface SearchInputProps {
+  disabled?: boolean;
+}
+export default function SearchInput({ disabled }: SearchInputProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="flex items-center w-full gap-2">
       <CategorySidebar
-        categories={categories}
         open={isSidebarOpen}
         onOpenChangeAction={setIsSidebarOpen}
       />
@@ -25,7 +21,7 @@ export default function SearchInput({
         <Input
           className="pl-8"
           placeholder="Search products"
-          // disabled={disabled}
+          disabled={disabled}
         />
       </div>
       <Button

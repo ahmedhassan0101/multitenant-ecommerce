@@ -1,16 +1,16 @@
 "use client";
 import { useRef, useState } from "react";
-import { Category } from "@/payload-types";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import useDropdownPosition from "./useDropdownPosition";
 import SubCategoryMenu from "./SubCategoryMenu";
+import { CategoriesGetAll } from "@/modules/categories/types";
 
 //1- search-filters\CategoryDropdown.tsx
 interface CategoryDropdownProps {
-  category: Category;
+  category: CategoriesGetAll[1];
   isActive?: boolean;
   isNavigationHovered?: boolean;
 }
