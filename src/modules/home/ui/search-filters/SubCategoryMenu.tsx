@@ -1,8 +1,8 @@
-import { Category } from "@/payload-types";
+import { CategoriesGetAll } from "@/modules/categories/types";
 import Link from "next/link";
 import React from "react";
 interface SubCategoryMenuProps {
-  category: Category;
+  category: CategoriesGetAll[1];
   isOpen: boolean;
   position: {
     left: number;

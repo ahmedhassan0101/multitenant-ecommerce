@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Category } from "@/payload-types";
 import {
   Sheet,
   SheetContent,
@@ -10,29 +9,33 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { CategoriesGetAll } from "@/modules/categories/types";
 
 interface CategorySidebarProps {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
-  categories: Category[];
 }
 export default function CategorySidebar({
   open,
   onOpenChangeAction,
-  categories = [], // Default value to prevent undefined access
 }: CategorySidebarProps) {
+  const trpc = useTRPC();
+  const categories = useQuery(trpc.categories.getAll.queryOptions());
+
   const router = useRouter();
-
   const [subCategories, setSubCategories] = useState<
-    Category["subcategories"] | null
+    CategoriesGetAll[1]["subcategories"] | null
   >(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<
+    CategoriesGetAll[1] | null
+  >(null);
 
-  const currentCategories = subCategories?.docs ?? categories ?? [];
+  const currentCategories = subCategories?.docs ?? categories?.data?.docs ?? [];
+
   const filteredCategories = currentCategories.filter(
-    (cat): cat is Category => typeof cat !== "string"
+    (cat): cat is CategoriesGetAll[1] => typeof cat !== "string"
   );
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -44,7 +47,7 @@ export default function CategorySidebar({
   );
 
   const handleCategoryClick = useCallback(
-    (category: Category) => {
+    (category: CategoriesGetAll[1]) => {
       const hasSubCategories =
         category.subcategories?.docs && category.subcategories.docs.length > 0;
 
@@ -74,6 +77,7 @@ export default function CategorySidebar({
   }, []);
   // Safe color access with fallback
   const backgroundColor = selectedCategory?.color ?? "#ffffff";
+  if (!categories.data) return <div>Loading...</div>;
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent

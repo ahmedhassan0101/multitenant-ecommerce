@@ -1,15 +1,19 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Category } from "@/payload-types";
 
 import CategoryDropdown from "./CategoryDropdown";
 import { cn } from "@/lib/utils";
 import { ListFilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CategorySidebar from "./CategorySidebar";
+import { CategoriesGetAll } from "@/modules/categories/types";
 
-export default function Categories({ categories }: { categories: Category[] }) {
+export default function Categories({
+  categories,
+}: {
+  categories: CategoriesGetAll;
+}) {
   const params = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -59,7 +63,6 @@ export default function Categories({ categories }: { categories: Category[] }) {
   return (
     <div className="relative w-full">
       <CategorySidebar
-        categories={categories}
         open={isSidebarOpen}
         onOpenChangeAction={setIsSidebarOpen}
       />
@@ -94,7 +97,7 @@ export default function Categories({ categories }: { categories: Category[] }) {
         }}
         className="flex flex-nowrap items-center"
       >
-        {categories.slice(0, visibleCount).map((category: Category) => (
+        {categories.slice(0, visibleCount).map((category) => (
           <CategoryDropdown
             key={category.id}
             category={category}
