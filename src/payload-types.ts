@@ -125,6 +125,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  username: string;
+  password: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -134,7 +136,6 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -239,6 +240,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  username?: T;
+  password?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
