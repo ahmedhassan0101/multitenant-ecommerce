@@ -37,6 +37,7 @@ export default function CategorySidebar({
   const filteredCategories = currentCategories.filter(
     (cat): cat is CategoriesGetAll[1] => typeof cat !== "string"
   );
+  
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setSubCategories(null);
