@@ -59,7 +59,7 @@ export default function SignInForm() {
   });
 
   const onSubmit = (formData: LoginFormData) => {
-    console.log(formData);
+    login.mutate(formData);
   };
 
   return (
