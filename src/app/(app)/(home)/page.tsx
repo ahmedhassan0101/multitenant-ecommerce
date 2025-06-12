@@ -6,9 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 export default function HomePage() {
   const trpc = useTRPC();
   const session = useQuery(trpc.auth.session.queryOptions());
+  console.log("🚀 ~ HomePage ~ session:", session)
   return (
     <pre>
-      <code>{JSON.stringify(session, null, 2)}</code>
+      {/* <code>{JSON.stringify(session, null, 2)}</code> */}
     </pre>
   );
 }
