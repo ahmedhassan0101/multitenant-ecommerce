@@ -1,11 +1,12 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { getQueryClient, trpc } from "@/trpc/server";
-import SearchFilters, { SearchFiltersSkeleton } from "@/modules/home/ui/search-filters";
+import SearchFilters, {
+  SearchFiltersSkeleton,
+} from "@/modules/home/ui/search-filters";
 import Navbar from "@/modules/home/ui/Navbar";
 import Footer from "@/modules/home/ui/Footer";
 import { Suspense } from "react";
-
 
 //  prefetchQuery approach
 export default async function Layout({
@@ -13,7 +14,6 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
- 
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.categories.getAll.queryOptions());
 
@@ -21,7 +21,7 @@ export default async function Layout({
     <section className="flex min-h-screen flex-col">
       <Navbar />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<SearchFiltersSkeleton/>}>
+        <Suspense fallback={<SearchFiltersSkeleton />}>
           <SearchFilters />
         </Suspense>
       </HydrationBoundary>
@@ -52,4 +52,3 @@ export default async function Layout({
 //   })),
 // }));
 // console.log("data: 50 50" + JSON.stringify(data, null, 2));
-
