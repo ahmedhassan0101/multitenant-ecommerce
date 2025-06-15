@@ -3,6 +3,7 @@ import { Product } from "@/payload-types";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
+import { useProductFilters } from "../use-product-filters";
 
 interface Props {
   categorySlug: string;
@@ -13,12 +14,18 @@ export default function ProductList({
   categorySlug,
   isSubcategory = false,
 }: Props) {
+  const [filters] = useProductFilters();
+
   const trpc = useTRPC();
   const products = useSuspenseQuery(
-    trpc.products.getAll.queryOptions({ categorySlug, isSubcategory })
+    trpc.products.getAll.queryOptions({
+      categorySlug,
+      isSubcategory,
+      ...filters,
+    })
   );
-  console.log("🚀 ~ products products products:", products.data);
-
+  // console.log("🚀 ~ products:000", products.data)
+// 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

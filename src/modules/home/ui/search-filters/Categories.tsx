@@ -24,7 +24,6 @@ export default function Categories({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const activeCategory = (params?.category as string) ?? "all";
-  // console.log("🚀 ~ activeCategory:", activeCategory);
 
   const activeCategoryIndex = categories.findIndex(
     (cat) => cat.slug === activeCategory
@@ -44,7 +43,6 @@ export default function Categories({
       const items = Array.from(measureRef.current.children);
       let totalWidth = 0;
       let visible = 0;
-      // console.log("🚀 ~ calculateVisible ~ items:", items);
       for (const item of items) {
         const width = item.getBoundingClientRect().width;
         if (totalWidth + width > availableWidth) break;

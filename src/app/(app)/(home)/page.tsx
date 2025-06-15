@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useTRPC } from "@/trpc/client";
@@ -6,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 export default function HomePage() {
   const trpc = useTRPC();
   const session = useQuery(trpc.auth.session.queryOptions());
-  console.log("🚀 ~ HomePage ~ session:", session)
+  // console.log("🚀 ~ HomePage ~ session:", session)
   return (
     <pre>
       {/* <code>{JSON.stringify(session, null, 2)}</code> */}

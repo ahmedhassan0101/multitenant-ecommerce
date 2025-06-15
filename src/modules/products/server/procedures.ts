@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 import {
@@ -11,26 +12,39 @@ export const productRouter = createTRPCRouter({
       z.object({
         categorySlug: z.string().nullable().optional(),
         isSubcategory: z.boolean().default(false),
+        minPrice: z.string().nullable().optional(),
+        maxPrice: z.string().nullable().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { categorySlug, isSubcategory } = input;
-
-      console.log("categorySlug: ", categorySlug); // category or subcategory
-      console.log("isSubcategory: ", isSubcategory); // boolean
+      const { categorySlug, isSubcategory, minPrice, maxPrice } = input;
 
       // If no category specified, return all products
       if (!categorySlug) {
+        const whereClause: Where = {};
+
+        if (minPrice) {
+          whereClause.price = {
+            ...(whereClause.price || {}),
+            greater_than_equal: parseFloat(minPrice),
+          };
+        }
+
+        if (maxPrice) {
+          whereClause.price = {
+            ...(whereClause.price || {}),
+            less_than_equal: parseFloat(maxPrice),
+          };
+        }
         const products = await ctx.payload.find({
           collection: "products",
           depth: 1,
           pagination: false,
+          where: whereClause,
         });
         return products.docs;
       }
-
       // First, find the category by slug
-
       const categoryResult = await ctx.payload.find({
         collection: "categories",
         where: {
@@ -47,9 +61,7 @@ export const productRouter = createTRPCRouter({
         throw new Error(`Category with slug "${categorySlug}" not found`);
       }
       const category = categoryResult.docs[0];
-
       let whereClause: Where;
-
       if (isSubcategory) {
         // For subcategory: only products that belong to this specific subcategory
         whereClause = {
@@ -61,7 +73,6 @@ export const productRouter = createTRPCRouter({
         // For parent category: products from this category + all its subcategories
         const subcategoryIds =
           category.subcategories?.docs?.map((sub: any) => sub.id) || [];
-
         whereClause = {
           or: [
             // Products directly in this category
@@ -83,12 +94,31 @@ export const productRouter = createTRPCRouter({
           ],
         };
       }
+
+      // ✅ Add minPrice/maxPrice filtering if present
+      if (minPrice || maxPrice) {
+        whereClause = {
+          and: [
+            whereClause,
+            {
+              price: {
+                ...(minPrice
+                  ? { greater_than_equal: parseFloat(minPrice) }
+                  : {}),
+                ...(maxPrice ? { less_than_equal: parseFloat(maxPrice) } : {}),
+              },
+            },
+          ],
+        };
+      }
+
       const products = await ctx.payload.find({
         collection: "products",
         where: whereClause,
         depth: 1,
         pagination: false,
       });
+      console.log("5555555", products.docs);
       return products.docs;
     }),
 });
