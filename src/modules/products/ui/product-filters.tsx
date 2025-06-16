@@ -28,6 +28,9 @@ export default function ProductFilters() {
       </CustomAccordionItem>
 
       <CustomAccordionItem title="Tags" className="border-b-0">
+        ProductSort
+      </CustomAccordionItem>
+      <CustomAccordionItem title="Tags" className="border-b-0">
         TagsFilter
       </CustomAccordionItem>
     </div>

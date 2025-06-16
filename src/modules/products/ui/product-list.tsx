@@ -24,13 +24,12 @@ export default function ProductList({
       ...filters,
     })
   );
-  // console.log("🚀 ~ products:000", products.data)
-// 
+ 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products?.data?.map((product: Product) => (
-          <div key={product.id} className="border p-4 rounded">
+          <div key={product.id} className="border p-4 rounded bg-white">
             <h3 className="font-bold">{product.name}</h3>
             <p className="text-gray-600">{product.description}</p>
             <p className="text-lg font-semibold">${product.price}</p>

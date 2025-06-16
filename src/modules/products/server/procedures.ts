@@ -2,10 +2,16 @@
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
-import {
-  // Sort,
-  Where,
-} from "payload";
+import { Sort, Where } from "payload";
+import { sortValues } from "@/lib/constants";
+
+const sortMap: Record<(typeof sortValues)[number], Sort> = {
+  curated: "-createdAt",
+  hot_and_new: "+createdAt",
+  trending: "-createdAt",
+  price_asc: "+price",
+  price_desc: "-price",
+};
 export const productRouter = createTRPCRouter({
   getAll: baseProcedure
     .input(
@@ -14,10 +20,13 @@ export const productRouter = createTRPCRouter({
         isSubcategory: z.boolean().default(false),
         minPrice: z.string().nullable().optional(),
         maxPrice: z.string().nullable().optional(),
+        sort: z.enum(sortValues).nullable().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { categorySlug, isSubcategory, minPrice, maxPrice } = input;
+      const { categorySlug, isSubcategory, minPrice, maxPrice, sort } = input;
+
+      const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
 
       // If no category specified, return all products
       if (!categorySlug) {
@@ -95,7 +104,7 @@ export const productRouter = createTRPCRouter({
         };
       }
 
-      // ✅ Add minPrice/maxPrice filtering if present
+      //  Add minPrice/maxPrice filtering if present
       if (minPrice || maxPrice) {
         whereClause = {
           and: [
@@ -117,8 +126,9 @@ export const productRouter = createTRPCRouter({
         where: whereClause,
         depth: 1,
         pagination: false,
+        sort: sortValue,
       });
-      console.log("5555555", products.docs);
+
       return products.docs;
     }),
 });
