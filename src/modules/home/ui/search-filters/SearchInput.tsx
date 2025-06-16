@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { Input } from "@/components/ui/input";
 import { BookmarkCheckIcon, ListFilterIcon, SearchIcon } from "lucide-react";
@@ -38,14 +39,14 @@ export default function SearchInput({ disabled }: SearchInputProps) {
       >
         <ListFilterIcon />
       </Button>
-      {session?.user && (
+      {/* {session?.user && (
         <Button asChild variant={"elevated"}>
           <Link href="/library">
             <BookmarkCheckIcon />
             Library
           </Link>
         </Button>
-      )}
+      )} */}
     </div>
   );
 }
