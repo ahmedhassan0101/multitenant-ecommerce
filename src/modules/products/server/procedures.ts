@@ -21,11 +21,12 @@ export const productRouter = createTRPCRouter({
         minPrice: z.string().nullable().optional(),
         maxPrice: z.string().nullable().optional(),
         sort: z.enum(sortValues).nullable().optional(),
+        tags: z.array(z.string()).nullable().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { categorySlug, isSubcategory, minPrice, maxPrice, sort } = input;
-
+      const { categorySlug, isSubcategory, minPrice, maxPrice, sort, tags } =
+        input;
       const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
 
       // If no category specified, return all products
@@ -44,6 +45,9 @@ export const productRouter = createTRPCRouter({
             ...(whereClause.price || {}),
             less_than_equal: parseFloat(maxPrice),
           };
+        }
+        if (tags && tags.length > 0) {
+          whereClause["tags.name"] = { in: tags };
         }
         const products = await ctx.payload.find({
           collection: "products",
@@ -120,7 +124,9 @@ export const productRouter = createTRPCRouter({
           ],
         };
       }
-
+      if (tags && tags.length > 0) {
+        whereClause["tags.name"] = { in: tags };
+      }
       const products = await ctx.payload.find({
         collection: "products",
         where: whereClause,

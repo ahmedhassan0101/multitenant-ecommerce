@@ -1,4 +1,4 @@
-export const DEFAULT_LIMIT = 10;
+export const DEFAULT_LIMIT = 6;
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_CURSOR = 1;
 export const DEFAULT_BG_COLOR = "#f5f5f5";

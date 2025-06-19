@@ -1,5 +1,4 @@
 "use client";
-import { Poppins } from "next/font/google";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "../schemas";
@@ -21,12 +20,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { poppins } from "@/modules/home/ui/Navbar";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["700"],
-  preload: true,
-});
+
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function SignInForm() {

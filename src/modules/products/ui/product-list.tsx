@@ -24,7 +24,6 @@ export default function ProductList({
       ...filters,
     })
   );
- 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -34,9 +33,26 @@ export default function ProductList({
             <p className="text-gray-600">{product.description}</p>
             <p className="text-lg font-semibold">${product.price}</p>
             <p className="text-sm text-gray-500">
-              Category:{" "}
-              {typeof product.category === "object" && product.category?.name}
+              Category:
+              <b className="text-red-500">
+                {typeof product.category === "object" && product.category?.name}
+              </b>
             </p>
+            {product.tags?.length ? (
+              <div className="flex gap-1 text-gray-500">
+                Tags:
+                {product.tags.map((t) =>
+                  typeof t === "object" && t !== null ? (
+                    <b
+                      key={t.id}
+                      className="bg-gray-300 text-sm text-black rounded-sm  px-1"
+                    >
+                      {t.name}
+                    </b>
+                  ) : null
+                )}
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
