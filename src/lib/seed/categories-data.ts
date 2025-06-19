@@ -1,3 +1,4 @@
+// src\lib\seed\categories-data.ts
 export const categories = [
   {
     name: "All",

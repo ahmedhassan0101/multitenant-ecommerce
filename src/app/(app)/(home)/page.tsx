@@ -1,16 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+// "use client";
 
 import { useTRPC } from "@/trpc/client";
+import { caller } from "@/trpc/server";
 import { useQuery } from "@tanstack/react-query";
 
-export default function HomePage() {
-  const trpc = useTRPC();
-  const session = useQuery(trpc.auth.session.queryOptions());
-  // console.log("🚀 ~ HomePage ~ session:", session)
+export default async function HomePage() {
+  // const tags = await caller.tags.getAll();
+  const products = await caller.products.getAll({});
+ 
+  // const trpc = useTRPC();
+  // const session = useQuery(trpc.auth.session.queryOptions());
   return (
     <pre>
-      {/* <code>{JSON.stringify(session, null, 2)}</code> */}
+      {/* <code>{JSON.stringify(tags.docs, null, 3)}</code> */}
+      <code>{JSON.stringify(products, null, 3)}</code>
     </pre>
   );
 }

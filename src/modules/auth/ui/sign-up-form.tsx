@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Poppins } from "next/font/google";
 import Link from "next/link";
 import React from "react";
 import { registerSchema } from "../schemas";
@@ -22,11 +21,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["700"],
-  preload: true,
-});
+import { poppins } from "@/modules/home/ui/Navbar";
 
 type SignUpFormData = z.infer<typeof registerSchema>;
 

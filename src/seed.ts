@@ -2,7 +2,6 @@ import config from "@payload-config";
 import { getPayload } from "payload";
 import { categoriesSeeder } from "./lib/seed/categories-seeder";
 
-
 async function seed() {
   try {
     const payload = await getPayload({ config });
