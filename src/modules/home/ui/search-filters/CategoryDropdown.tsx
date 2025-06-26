@@ -1,14 +1,14 @@
 "use client";
-import { useRef, useState } from "react";
+import {useState } from "react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import useDropdownPosition from "./useDropdownPosition";
+
 import SubCategoryMenu from "./SubCategoryMenu";
 import { CategoriesGetAll } from "@/modules/categories/types";
 
-//1- search-filters\CategoryDropdown.tsx
+
 interface CategoryDropdownProps {
   category: CategoriesGetAll[1];
   isActive?: boolean;
@@ -20,12 +20,7 @@ export default function CategoryDropdown({
   isActive,
   isNavigationHovered,
 }: CategoryDropdownProps) {
-  //! dropdown Logic-----------------------------
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const getDropdownPosition = useDropdownPosition(dropdownRef);
-  const dropdownPosition = getDropdownPosition();
-  //! dropdown Logic-----------------------------
 
   //! Hover Logic-----------------------------
   const hasSubcategories =
@@ -47,7 +42,7 @@ export default function CategoryDropdown({
   return (
     <div
       className="relative"
-      ref={dropdownRef}
+      // ref={dropdownRef}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={toggleDropdown}
@@ -79,7 +74,6 @@ export default function CategoryDropdown({
       <SubCategoryMenu
         category={category}
         isOpen={isOpen}
-        position={dropdownPosition}
       />
     </div>
   );

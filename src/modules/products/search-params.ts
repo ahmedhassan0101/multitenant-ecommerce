@@ -3,6 +3,7 @@ import { sortValues } from "@/lib/constants";
 import {
   createLoader,
   parseAsArrayOf,
+  parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
@@ -17,6 +18,8 @@ export const params = {
       clearOnDefault: true,
     })
     .withDefault([]),
+      page: parseAsInteger.withDefault(1),
+  limit: parseAsInteger.withDefault(6),
 };
 
 export const loadProductFilters = createLoader(params);
