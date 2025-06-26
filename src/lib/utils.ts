@@ -21,3 +21,11 @@ export const formatAsCurrency = (value: string): string => {
     maximumFractionDigits: 2,
   }).format(numberValue);
 };
+
+export function formatCurrency(value: number | string) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency", // Format output as currency
+    currency: "USD", // Use US Dollars
+    maximumFractionDigits: 0, // Round to whole number
+  }).format(Number(value)); // Convert value to number and apply formatting
+}

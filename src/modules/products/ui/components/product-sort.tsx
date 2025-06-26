@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useProductFilters } from "../use-product-filters";
+import { useProductFilters } from "../../use-product-filters";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { sortOptions, sortValues } from "@/lib/constants";

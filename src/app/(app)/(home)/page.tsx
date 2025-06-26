@@ -1,23 +1,48 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// "use client";
+import { loadProductFilters } from "@/modules/products/search-params";
+import ProductListView from "@/modules/products/ui/views/product-list-view";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SearchParams } from "nuqs/server";
 
-import { useTRPC } from "@/trpc/client";
-import { caller } from "@/trpc/server";
-import { useQuery } from "@tanstack/react-query";
+interface HomeProps {
+  searchParams: Promise<SearchParams>;
+}
 
-export default async function HomePage() {
-  // const tags = await caller.tags.getAll();
-  const products = await caller.products.getAll({});
- 
-  // const trpc = useTRPC();
-  // const session = useQuery(trpc.auth.session.queryOptions());
+export default async function HomePage({ searchParams }: HomeProps) {
+  const filters = await loadProductFilters(searchParams);
+  const queryClient = getQueryClient();
+  try {
+    // Prefetch products for this parent category (includes subcategories)
+    void queryClient.prefetchQuery(
+      trpc.products.getAll.queryOptions({
+        ...filters,
+        // limit: DEFAULT_LIMIT, // Use default pagination limit
+      })
+    );
+  } catch (error) {
+    console.error("Error prefetching category data:", error);
+    // notFound();
+  }
   return (
-    <pre>
-      {/* <code>{JSON.stringify(tags.docs, null, 3)}</code> */}
-      <code>{JSON.stringify(products, null, 3)}</code>
-    </pre>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProductListView />
+    </HydrationBoundary>
   );
 }
+
+// export default async function HomePage() {
+//   // const tags = await caller.tags.getAll();
+//   const products = await caller.products.getAll({});
+
+//   // const trpc = useTRPC();
+//   // const session = useQuery(trpc.auth.session.queryOptions());
+//   return (
+//     <pre>
+//       {/* <code>{JSON.stringify(tags.docs, null, 3)}</code> */}
+//       <code>{JSON.stringify(products, null, 3)}</code>
+//     </pre>
+//   );
+// }
 
 // TODO: Server component approach
 // import { getQueryClient, trpc } from "@/trpc/server";

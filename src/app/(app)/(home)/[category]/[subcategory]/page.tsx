@@ -1,20 +1,20 @@
-import ProductList, {
-  ProductListSkeleton,
-} from "@/modules/products/ui/product-list";
+import { DEFAULT_LIMIT } from "@/lib/constants";
+import { loadProductFilters } from "@/modules/products/search-params";
+import ProductListView from "@/modules/products/ui/views/product-list-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { Suspense } from "react";
+import type { SearchParams } from "nuqs/server";
 
-// src\app\(app)\(home)\[category]\[subcategory]\page.tsx
 interface Props {
   params: Promise<{
-    category: string;
     subcategory: string;
   }>;
+  searchParams: Promise<SearchParams>;
 }
 
-export default async function SubCategoryPage({ params }: Props) {
-  const { category, subcategory } = await params;
+export default async function SubCategoryPage({ params, searchParams }: Props) {
+  const { subcategory } = await params;
+  const filters = await loadProductFilters(searchParams);
   const queryClient = getQueryClient();
 
   try {
@@ -23,6 +23,8 @@ export default async function SubCategoryPage({ params }: Props) {
       trpc.products.getAll.queryOptions({
         categorySlug: subcategory, // Use subcategory slug
         isSubcategory: true, // This is a subcategory
+        ...filters,
+        // limit: DEFAULT_LIMIT, // Use default pagination limit
       })
     );
   } catch (error) {
@@ -31,15 +33,17 @@ export default async function SubCategoryPage({ params }: Props) {
   }
 
   return (
-    <>
-      <h1>Welcome to SubCategory page!</h1>
-      <h1>Category: {category} </h1>
-      <h1>SubCategory: {subcategory}</h1>
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<ProductListSkeleton />}>
-          <ProductList categorySlug={subcategory} isSubcategory={true} />
-        </Suspense>
-      </HydrationBoundary>
-    </>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProductListView categorySlug={subcategory} isSubcategory={true} />
+    </HydrationBoundary>
   );
+}
+
+
+{
+  /* 
+    <Suspense fallback={<ProductListSkeleton />}>
+      <ProductList categorySlug={subcategory} isSubcategory={true} />
+    </Suspense> 
+  */
 }
