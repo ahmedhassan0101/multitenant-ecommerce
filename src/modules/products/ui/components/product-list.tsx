@@ -6,6 +6,7 @@ import React from "react";
 import { useProductFilters } from "../../use-product-filters";
 import ProductCard from "./product-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import PaginationComponent from "@/components/global/pagination-component";
 interface Props {
   categorySlug?: string;
   isSubcategory?: boolean;
@@ -15,20 +16,28 @@ export default function ProductList({
   categorySlug,
   isSubcategory = false,
 }: Props) {
-  const [filters] = useProductFilters();
+  const [filters, setFilters] = useProductFilters();
 
   const trpc = useTRPC();
-  const products = useSuspenseQuery(
+  const {
+    data: { products, pagination },
+  } = useSuspenseQuery(
     trpc.products.getAll.queryOptions({
       categorySlug,
       isSubcategory,
       ...filters,
     })
   );
+  const handlePageChange = (page: number) => {
+    setFilters({ page });
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.data?.map((product: Product) => {
+        {products?.map((product: Product) => {
           const media = product.image;
           const imageUrl =
             typeof media === "object" && media !== null && "url" in media
@@ -49,11 +58,19 @@ export default function ProductList({
           );
         })}
       </div>
+      {/* Pagination Component */}
+      {pagination && (
+        <PaginationComponent
+          currentPage={pagination.page!}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+          totalItems={pagination.totalDocs}
+          itemsPerPage={pagination.limit}
+        />
+      )}
     </>
   );
 }
-
-
 
 export function ProductListSkeleton() {
   return (

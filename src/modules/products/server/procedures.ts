@@ -22,11 +22,21 @@ export const productRouter = createTRPCRouter({
         maxPrice: z.string().nullable().optional(),
         sort: z.enum(sortValues).nullable().optional(),
         tags: z.array(z.string()).nullable().optional(),
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(6),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { categorySlug, isSubcategory, minPrice, maxPrice, sort, tags } =
-        input;
+      const {
+        categorySlug,
+        isSubcategory,
+        minPrice,
+        maxPrice,
+        sort,
+        tags,
+        page,
+        limit,
+      } = input;
       const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
 
       // Build category where clause
@@ -118,14 +128,25 @@ export const productRouter = createTRPCRouter({
         where: finalWhere,
         depth: 1,
         pagination: true,
-        limit: 6,
-        page: 1,
+        page: page,
+        limit: limit,
         sort: sortValue,
       });
-      console.log("products-----: ", products);
 
-      return products.docs;
-      //  !OR
+      return {
+        products: products.docs,
+        pagination: {
+          page: products.page,
+          limit: products.limit,
+          totalPages: products.totalPages,
+          totalDocs: products.totalDocs,
+          hasNextPage: products.hasNextPage,
+          hasPrevPage: products.hasPrevPage,
+          nextPage: products.nextPage,
+          prevPage: products.prevPage,
+        },
+      };
+      //  !OR 
       //   return {
       //   ...products,
       //   docs: products.docs.map((doc) => ({

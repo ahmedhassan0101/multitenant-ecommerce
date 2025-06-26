@@ -4,15 +4,10 @@ import React from "react";
 interface SubCategoryMenuProps {
   category: CategoriesGetAll[1];
   isOpen: boolean;
-  position: {
-    left: number;
-    top: number;
-  };
 }
 export default function SubCategoryMenu({
   category,
   isOpen,
-  position,
 }: SubCategoryMenuProps) {
   const hasSubcategories =
     Array.isArray(category.subcategories?.docs) &&
@@ -24,10 +19,7 @@ export default function SubCategoryMenu({
   const backgroundColor = category.color || "#f5f5f5";
 
   return (
-    <div
-      className="fixed z-100"
-      style={{ top: position.top, left: position.left }}
-    >
+    <div className="absolute top-full left-0 z-100">
       {/* Invisible bridge to maintain hover */}
       <div className="h-3 w-60" />
       <div

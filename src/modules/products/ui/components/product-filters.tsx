@@ -7,11 +7,15 @@ import { useProductFilters } from "../../use-product-filters";
 import TagsFilter from "./tags-filter";
 import { Button } from "@/components/ui/button";
 
+const excludedKeys = ["sort", "page", "limit"];
+
 export default function ProductFilters() {
   const [filters, setFilters] = useProductFilters();
 
   const hasAnyFilters = Object.entries(filters).some(([key, value]) => {
-    if (key === "sort") return false;
+    // if (key === "sort") return false;
+    if (excludedKeys.includes(key)) return false;
+
     if (Array.isArray(value)) {
       return value.length > 0;
     }
@@ -28,7 +32,6 @@ export default function ProductFilters() {
     setFilters({ minPrice: "", maxPrice: "", tags: [] });
   };
 
-  console.log("🚀 ~ ProductFilters ~ hasAnyFilters:", filters);
   return (
     <div className="bg-white border rounded-md">
       <div className="flex items-center justify-between p-4 border-b">
