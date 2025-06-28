@@ -19,11 +19,12 @@ export const authRouter = createTRPCRouter({
   register: baseProcedure
     .input(registerSchema)
     .mutation(async ({ ctx, input }) => {
+      const { username, email, password } = input;
       // Check if username already exists
       const existingUser = await ctx.payload.find({
         collection: "users",
         limit: 1,
-        where: { username: { equals: input.username } },
+        where: { username: { equals: username } },
       });
 
       if (existingUser?.docs[0]) {
@@ -33,13 +34,25 @@ export const authRouter = createTRPCRouter({
         });
       }
 
+      // Create a new tenant for the user
+
+      const tenant = await ctx.payload.create({
+        collection: "tenants",
+        data: {
+          name: username,
+          slug: username,
+          stripeAccountId: "test",
+        },
+      });
+
       // Create new user
       await ctx.payload.create({
         collection: "users",
         data: {
-          email: input.email,
-          password: input.password,
-          username: input.username,
+          email: email,
+          password: password,
+          username: username,
+          tenants: [{ tenant: tenant.id }], // Link the created tenant to the user
         },
       });
 
@@ -47,8 +60,8 @@ export const authRouter = createTRPCRouter({
       const data = await ctx.payload.login({
         collection: "users",
         data: {
-          email: input.email,
-          password: input.password,
+          email: email,
+          password: password,
         },
       });
       if (!data.token) {
@@ -66,12 +79,13 @@ export const authRouter = createTRPCRouter({
     }),
 
   login: baseProcedure.input(loginSchema).mutation(async ({ ctx, input }) => {
+    const { email, password } = input;
     // Authenticate user
     const data = await ctx.payload.login({
       collection: "users",
       data: {
-        email: input.email,
-        password: input.password,
+        email: email,
+        password: password,
       },
     });
     if (!data.token) {
@@ -80,7 +94,7 @@ export const authRouter = createTRPCRouter({
         message: ERROR_MESSAGES.INVALID_CREDENTIALS,
       });
     }
-    
+
     // Set authentication cookie
     await generateAuthCookie({
       prefix: ctx.payload.config.cookiePrefix,
