@@ -85,11 +85,11 @@ export default function PaginationComponent({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => safePage > 1 && onPageChange(safePage - 1)}
-                className={
+                className={`bg-white ${
                   safePage <= 1
                     ? "pointer-events-none opacity-50"
                     : "cursor-pointer"
-                }
+                }`}
               />
             </PaginationItem>
 
@@ -101,7 +101,7 @@ export default function PaginationComponent({
                   <PaginationLink
                     onClick={() => onPageChange(page as number)}
                     isActive={safePage === page}
-                    className="cursor-pointer"
+                    className="cursor-pointer bg-white"
                   >
                     {page}
                   </PaginationLink>
@@ -114,11 +114,11 @@ export default function PaginationComponent({
                 onClick={() =>
                   safePage < safeTotalPages && onPageChange(safePage + 1)
                 }
-                className={
+                className={`bg-white ${
                   safePage >= safeTotalPages
                     ? "pointer-events-none opacity-50"
                     : "cursor-pointer"
-                }
+                }`}
               />
             </PaginationItem>
           </PaginationContent>

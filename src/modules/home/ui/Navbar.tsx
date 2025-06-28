@@ -12,7 +12,6 @@ import { NavbarSidebar } from "./NavbarSidebar";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 
-
 export const poppins = Poppins({
   subsets: ["latin"],
   weight: ["700"],
@@ -64,7 +63,9 @@ export default function Navbar() {
             asChild
             className="h-full px-12 text-lg text-white transition-colors bg-black border-t-0 border-b-0 border-l border-r-0 rounded-none hover:bg-pink-400 hover:text-black"
           >
-            <Link href="/admin">Dashboard</Link>
+            <Link href="/admin" target="_blank" rel="noopener noreferrer">
+              Dashboard
+            </Link>
           </Button>
         </div>
       ) : (
