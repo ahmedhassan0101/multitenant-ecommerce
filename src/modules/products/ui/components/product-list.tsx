@@ -1,5 +1,5 @@
 "use client";
-import { Product } from "@/payload-types";
+
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
@@ -10,11 +10,13 @@ import PaginationComponent from "@/components/global/pagination-component";
 interface Props {
   categorySlug?: string;
   isSubcategory?: boolean;
+  tenantSlug?: string;
 }
 
 export default function ProductList({
   categorySlug,
   isSubcategory = false,
+  tenantSlug,
 }: Props) {
   const [filters, setFilters] = useProductFilters();
 
@@ -25,6 +27,7 @@ export default function ProductList({
     trpc.products.getAll.queryOptions({
       categorySlug,
       isSubcategory,
+      tenantSlug,
       ...filters,
     })
   );
@@ -37,20 +40,21 @@ export default function ProductList({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products?.map((product: Product) => {
-          const media = product.image;
-          const imageUrl =
-            typeof media === "object" && media !== null && "url" in media
-              ? media.url
-              : undefined;
+        {products?.map((product) => {
+          // {products?.map((product: Product) => {
+          // const media = product.image;
+          // const imageUrl =
+          //   typeof media === "object" && media !== null && "url" in media
+          //     ? media.url
+          //     : undefined;
           return (
             <ProductCard
               key={product.id}
               id={product.id}
               name={product.name}
-              imageUrl={imageUrl}
-              tenantSlug="Ahmed"
-              tenantImageUrl={undefined}
+              imageUrl={product.image?.url}
+              tenantSlug={product.tenant?.slug}
+              tenantImageUrl={product.tenant?.image?.url}
               reviewRating={3}
               reviewCount={5}
               price={product.price}

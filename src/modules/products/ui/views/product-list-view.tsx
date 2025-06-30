@@ -6,11 +6,13 @@ import ProductList, { ProductListSkeleton } from "../components/product-list";
 type ProductListViewProps = {
   categorySlug?: string;
   isSubcategory?: boolean;
+  tenantSlug?: string;
 };
 
 export default function ProductListView({
   categorySlug,
   isSubcategory,
+  tenantSlug,
 }: ProductListViewProps) {
   return (
     <div className="flex flex-col gap-8 px-4 py-8 lg:px-12">
@@ -24,6 +26,7 @@ export default function ProductListView({
             <ProductList
               categorySlug={categorySlug}
               isSubcategory={isSubcategory}
+              tenantSlug={tenantSlug}
             />
           </Suspense>
         </div>

@@ -1,7 +1,8 @@
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, generateTenantURL } from "@/lib/utils";
 import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 type ProductCardProps = {
@@ -25,6 +26,13 @@ export default function ProductCard({
   reviewCount,
   price,
 }: ProductCardProps) {
+  const router = useRouter(); // Initialize Next.js router for programmatic navigation
+
+  const handleUserClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(generateTenantURL(tenantSlug)); // Navigate to the tenant's store page
+  };
   return (
     <Link href={`/products/${id}`}>
       {/* <Link href={`${generateTenantURL(tenantSlug)}/products/${id}`}> */}
@@ -42,10 +50,7 @@ export default function ProductCard({
           <h2 className="text-lg font-medium line-clamp-4">{name}</h2>
 
           {/* click navigates to tenant's store */}
-          <div
-            className="flex items-center gap-2"
-            // onClick={handleUserClick}
-          >
+          <div className="flex items-center gap-2" onClick={handleUserClick}>
             {tenantImageUrl && (
               <Image
                 alt={tenantSlug}
