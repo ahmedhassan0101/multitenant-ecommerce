@@ -4,6 +4,7 @@ import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 import { Sort, Where } from "payload";
 import { sortValues } from "@/lib/constants";
+import { Media, Tenant } from "@/payload-types";
 
 const sortMap: Record<(typeof sortValues)[number], Sort> = {
   curated: "-createdAt",
@@ -24,6 +25,7 @@ export const productRouter = createTRPCRouter({
         tags: z.array(z.string()).nullable().optional(),
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(6),
+        tenantSlug: z.string().nullable().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -36,6 +38,7 @@ export const productRouter = createTRPCRouter({
         tags,
         page,
         limit,
+        tenantSlug,
       } = input;
       const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
 
@@ -118,6 +121,11 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      // Apply tenant filter if a tenant slug is provided
+      if (tenantSlug) {
+        conditions.push({ "tenant.slug": { equals: tenantSlug } });
+      }
+
       // Combine all conditions
       const finalWhere =
         conditions.length > 1 ? { and: conditions } : conditions[0] || {};
@@ -126,7 +134,7 @@ export const productRouter = createTRPCRouter({
       const products = await ctx.payload.find({
         collection: "products",
         where: finalWhere,
-        depth: 1,
+        depth: 2,
         pagination: true,
         page: page,
         limit: limit,
@@ -134,7 +142,12 @@ export const productRouter = createTRPCRouter({
       });
 
       return {
-        products: products.docs,
+        products: products.docs.map((doc) => ({
+          ...doc,
+          image: doc.image as Media | null, // Cast product image to Media or null to enforce proper type
+          tenant: doc.tenant as Tenant & { image: Media | null }, // Cast tenant field to include image property
+        })),
+        // products: products.docs,
         pagination: {
           page: products.page,
           limit: products.limit,
@@ -146,13 +159,13 @@ export const productRouter = createTRPCRouter({
           prevPage: products.prevPage,
         },
       };
-      //  !OR 
+      //  !OR
       //   return {
       //   ...products,
-      //   docs: products.docs.map((doc) => ({
-      //     ...doc,
-      //     image: doc.image as Media | null,
-      //   })),
+      // docs: products.docs.map((doc) => ({
+      //   ...doc,
+      //   image: doc.image as Media | null,
+      // })),
       // };
     }),
 });

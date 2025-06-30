@@ -29,3 +29,7 @@ export function formatCurrency(value: number | string) {
     maximumFractionDigits: 0, // Round to whole number
   }).format(Number(value)); // Convert value to number and apply formatting
 }
+
+export function generateTenantURL(tenantSlug: string) {
+  return `/tenants/${tenantSlug}`;
+}
