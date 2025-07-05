@@ -14,6 +14,21 @@ const sortMap: Record<(typeof sortValues)[number], Sort> = {
   price_desc: "-price",
 };
 export const productRouter = createTRPCRouter({
+  getOne: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input: { id } }) => {
+      const product = await ctx.payload.findByID({
+        collection: "products",
+        depth: 2,
+        id,
+      });
+      return {
+        ...product,
+        image: product.image as Media | null,
+        tenant: product.tenant as Tenant & { image: Media | null },
+      };
+    }),
+
   getAll: baseProcedure
     .input(
       z.object({
@@ -312,3 +327,4 @@ export const productRouter = createTRPCRouter({
 //             : [baseCondition],
 //         };
 //       }
+  

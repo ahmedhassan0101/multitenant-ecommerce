@@ -34,8 +34,8 @@ export default function ProductCard({
     router.push(generateTenantURL(tenantSlug)); // Navigate to the tenant's store page
   };
   return (
-    <Link href={`/products/${id}`}>
-      {/* <Link href={`${generateTenantURL(tenantSlug)}/products/${id}`}> */}
+    // /tenants/tenantSlug/products/id
+    <Link href={`${generateTenantURL(tenantSlug)}/products/${id}`}>
       <div className="hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow border rounded-md bg-white overflow-hidden h-full flex flex-col">
         <div className="relative aspect-square">
           <Image
