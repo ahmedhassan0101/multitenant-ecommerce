@@ -19,7 +19,7 @@ interface CartState {
 
 export const useCartStore = create<CartState>()(
   persist(
-    immer((set, get) => ({
+    immer((set) => ({
       // state
       tenantCarts: {},
 
@@ -48,15 +48,15 @@ export const useCartStore = create<CartState>()(
 
       removeProduct: (slug, id) =>
         set((state) => {
-          const existingCart = get().tenantCarts[slug];
+          const existingCart = state.tenantCarts[slug];
           if (!existingCart) return state;
 
           return {
             tenantCarts: {
-              ...get().tenantCarts,
+              ...state.tenantCarts,
               [slug]: {
                 productIds: existingCart.productIds.filter(
-                  (prodId) => prodId !== id
+                  (pId: string) => pId !== id
                 ),
               },
             },
