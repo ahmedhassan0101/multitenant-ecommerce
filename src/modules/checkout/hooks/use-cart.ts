@@ -4,16 +4,25 @@ import { useCartStore } from "../store/use-cart-store";
 import { useShallow } from "zustand/react/shallow";
 
 export default function useCart(tenantSlug: string) {
-  const { addProduct, removeProduct, clearCart, clearAllCarts, productIds } =
-    useCartStore(
-      useShallow((state) => ({
-        addProduct: state.addProduct,
-        removeProduct: state.removeProduct,
-        clearCart: state.clearCart,
-        clearAllCarts: state.clearAllCarts,
-        productIds: state.tenantCarts[tenantSlug]?.productIds || [],
-      }))
-    );
+  // const { addProduct, removeProduct, clearCart, clearAllCarts, productIds } =
+  //   useCartStore(
+  //     useShallow((state) => ({
+  //       addProduct: state.addProduct,
+  //       removeProduct: state.removeProduct,
+  //       clearCart: state.clearCart,
+  //       clearAllCarts: state.clearAllCarts,
+  //       productIds: state.tenantCarts[tenantSlug]?.productIds || [],
+  //     }))
+  //   );
+  const addProduct = useCartStore((state) => state.addProduct);
+  const removeProduct = useCartStore((state) => state.removeProduct);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const clearAllCarts = useCartStore((state) => state.clearAllCarts);
+
+  const productIds = useCartStore(
+    useShallow((state) => state.tenantCarts[tenantSlug]?.productIds || [])
+  );
+
   // Memoize the total count for better performance
   const totalItems = useMemo(() => productIds.length, [productIds]);
 

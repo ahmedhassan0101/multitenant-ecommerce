@@ -10,6 +10,20 @@ import { CheckIcon, LinkIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { Fragment } from "react";
+import dynamic from "next/dynamic";
+// import { CartButton } from "../components/cart-button";
+
+const CartButton = dynamic(
+  () => import("../components/cart-button").then((mod) => mod.CartButton),
+  {
+    ssr: false,
+    loading: () => (
+      <Button disabled className="flex-1 bg-pink-400">
+        Add to card
+      </Button>
+    ),
+  }
+);
 
 type ProductViewProps = {
   productId: string;
@@ -66,7 +80,7 @@ export default function ProductView({
                   href={generateTenantURL(tenantSlug)}
                   className="flex items-center gap-2"
                 >
-                  {data.tenant.image?.url && (
+                  {data.tenant?.image?.url && (
                     <Image
                       src={data.tenant.image.url}
                       alt={data.tenant.name}
@@ -77,11 +91,10 @@ export default function ProductView({
                   )}
 
                   <p className="text-base underline font-medium">
-                    {data.tenant.name}
+                    {data.tenant?.name}
                   </p>
                 </Link>
               </div>
-
               {/* Rating for desktop */}
               <div className="hidden lg:flex px-6 py-4 items-center justify-center">
                 <div className="flex items-center gap-2">
@@ -132,14 +145,11 @@ export default function ProductView({
               <div className="flex flex-col gap-4 p-6 border-b">
                 {/* Cart and share action buttons */}
                 <div className="flex flex-row items-center gap-2">
-                  {/* <CartButton
-                    isPurchased={data.isPurchased}
+                  <CartButton
+                    // isPurchased={data.isPurchased}
                     tenantSlug={tenantSlug}
                     productId={productId}
-                  /> */}
-                  <Button disabled className="flex-1 bg-pink-400">
-                    Add to card
-                  </Button>
+                  />
                   <Button
                     variant={"elevated"}
                     className="size-12"
@@ -192,13 +202,13 @@ export default function ProductView({
                       </div>
 
                       <Progress
-                        value={stars * 100}
+                        value={stars * 20}
                         // value={data.ratingDistribution[stars]}
                         className="h-[1lh]"
                       />
 
                       <div className="font-medium">
-                        {stars * 100}%{/* {data.ratingDistribution[stars]}% */}
+                        {stars * 20}%{/* {data.ratingDistribution[stars]}% */}
                       </div>
                     </Fragment>
                   ))}
