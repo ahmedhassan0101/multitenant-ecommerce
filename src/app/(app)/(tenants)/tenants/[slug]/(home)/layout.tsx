@@ -1,4 +1,4 @@
-import { Footer } from "@/modules/tenants/ui/footer";
+import Footer from "@/modules/tenants/ui/footer";
 import { Navbar, NavbarSkeleton } from "@/modules/tenants/ui/navbar";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
