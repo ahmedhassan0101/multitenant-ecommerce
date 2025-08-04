@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useCart from "../../hooks/use-cart";
 import { useTRPC } from "@/trpc/client";
 import { InboxIcon, LoaderIcon } from "lucide-react";
@@ -10,45 +10,24 @@ import CheckoutSidebar from "../components/checkout-sidebar";
 import CheckoutItem from "../components/checkout-item";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useCheckoutState } from "../../hooks/use-checkout-state";
+import { useRouter } from "next/navigation";
+import { useCheckoutLogic } from "../../hooks/useCheckoutLogic";
 
 type CheckoutViewProps = { tenantSlug: string };
 
 export default function CheckoutView({ tenantSlug }: CheckoutViewProps) {
-  const { productIds, removeFromCart, clearTenantCart } = useCart(tenantSlug);
+  const {
+    data,
+    isLoading,
+    isPending,
+    purchaseHandler,
+    states,
+    removeFromCart,
+  } = useCheckoutLogic(tenantSlug);
 
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-
-  const { data, error, isLoading } = useQuery(
-    trpc.checkout.getProducts.queryOptions({ ids: productIds })
-  );
-  useEffect(() => {
-    if (data?.missingIds?.length) {
-      data.missingIds.forEach((id) => removeFromCart(id));
-      toast.warning("Some products were removed from your cart.");
-    }
-  }, [data, removeFromCart]);
-
-  if (isLoading) {
-    return (
-      <div className="lg:pt-16 pt-4 px-4 lg:px-12">
-        <div className="border border-black border-dashed flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
-          <LoaderIcon className="text-muted-foreground animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
-  if (data?.totalDocs === 0) {
-    return (
-      <div className="lg:pt-16 pt-4 px-4 lg:px-12">
-        <div className="border border-black border-dashed flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
-          <InboxIcon />
-          <p className="text-base font-medium">No products found</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingComponent />;
+  if (data?.totalDocs === 0) return <EmptyComponent />;
 
   return (
     <div className="lg:pt-16 pt-4 px-4 lg:px-12">
@@ -73,15 +52,31 @@ export default function CheckoutView({ tenantSlug }: CheckoutViewProps) {
         <div className="lg:col-span-3">
           <CheckoutSidebar
             total={data?.totalPrice || 0}
-            // onPurchase={() => purchase.mutate({ tenantSlug, productIds })}
-            isCanceled={true}
-            disabled={false}
+            onPurchase={purchaseHandler}
+            isCanceled={states.cancel}
+            disabled={isPending}
           />
         </div>
       </div>
     </div>
   );
 }
+
+const LoadingComponent = () => (
+  <div className="lg:pt-16 pt-4 px-4 lg:px-12">
+    <div className="border border-black border-dashed flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
+      <LoaderIcon className="text-muted-foreground animate-spin" />
+    </div>
+  </div>
+);
+const EmptyComponent = () => (
+  <div className="lg:pt-16 pt-4 px-4 lg:px-12">
+    <div className="border border-black border-dashed flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
+      <InboxIcon />
+      <p className="text-base font-medium">No products found</p>
+    </div>
+  </div>
+);
 
 // TODO -------------------------------
 
@@ -113,3 +108,68 @@ export default function CheckoutView({ tenantSlug }: CheckoutViewProps) {
 //     toast.warning("Some products were removed from your cart.");
 //   }
 // }, [data]);
+
+//NOTE - Current version
+//  useEffect(() => {
+//     if (data?.missingIds?.length) {
+//       data.missingIds.forEach((id) => removeFromCart(id));
+//       toast.warning("Some products were removed from your cart.");
+//     }
+//   }, [data, removeFromCart]);
+
+// -----------------------------------------
+// const router = useRouter();
+
+// const { productIds, removeFromCart, clearTenantCart } = useCart(tenantSlug);
+
+// const [states, setStates] = useCheckoutState();
+
+// const trpc = useTRPC();
+
+// const queryClient = useQueryClient();
+
+// const { data, error, isLoading } = useQuery(
+//   trpc.checkout.getProducts.queryOptions({ ids: productIds })
+// );
+
+// const { mutate, isPending } = useMutation(
+//   trpc.checkout.purchase.mutationOptions({
+//     onMutate: () => {
+//       setStates({ success: false, cancel: false });
+//     },
+//     onSuccess: (data) => {
+//       window.location.href = data.url;
+//     },
+//     onError: (error) => {
+//       if (error.data?.code === "UNAUTHORIZED") router.push("/sign-in");
+//     },
+//   })
+// );
+
+// useEffect(() => {
+//   if (error?.data?.code === "NOT_FOUND") {
+//     clearTenantCart();
+//     toast.warning("Invalid products found, cart cleared.");
+//   }
+// }, [error, clearTenantCart]);
+
+// useEffect(() => {
+//   if (states.success) {
+//     setStates({
+//       success: false,
+//       cancel: false,
+//     });
+//     clearTenantCart();
+//     // queryClient.invalidateQueries(trpc.library.getMany.infiniteQueryFilter());
+//     // router.push("/library");
+//   }
+// }, [
+//   states.success,
+//   clearTenantCart,
+//   // router,
+//   setStates,
+// ]);
+
+// const purchaseHandler = () => {
+//   mutate({ tenantSlug, productIds });
+// };

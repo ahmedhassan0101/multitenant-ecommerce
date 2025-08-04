@@ -2,17 +2,16 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { CircleXIcon } from "lucide-react";
 
-
 interface CheckoutSidebarProps {
-  total: number; 
-  // onPurchase: () => void; 
-  isCanceled?: boolean; 
-  disabled?: boolean; 
+  total: number;
+  onPurchase: () => void;
+  isCanceled?: boolean;
+  disabled?: boolean;
 }
 
 export default function CheckoutSidebar({
   total,
-  // onPurchase,
+  onPurchase,
   isCanceled,
   disabled,
 }: CheckoutSidebarProps) {
@@ -25,9 +24,9 @@ export default function CheckoutSidebar({
 
       <div className="p-4 flex items-center justify-center">
         <Button
-          variant={"elevated"} 
-          disabled={disabled} 
-          // onClick={onPurchase}
+          variant={"elevated"}
+          disabled={disabled}
+          onClick={onPurchase}
           size={"lg"}
           className="text-base w-full text-white bg-primary hover:bg-pink-400 hover:text-primary"
         >
@@ -47,4 +46,4 @@ export default function CheckoutSidebar({
       )}
     </div>
   );
-};
+}

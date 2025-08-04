@@ -12,7 +12,13 @@ const ERROR_MESSAGES = {
 export const authRouter = createTRPCRouter({
   session: baseProcedure.query(async ({ ctx }) => {
     const headers = await getHeaders();
+
+    // const headersObj = Object.fromEntries(headers.entries());
     const session = await ctx.payload.auth({ headers });
+
+    // console.log("📦 Headers:", JSON.stringify(headersObj, null, 2));
+    // console.log("👤 Session:", JSON.stringify(session, null, 2));
+
     return session;
   }),
 
