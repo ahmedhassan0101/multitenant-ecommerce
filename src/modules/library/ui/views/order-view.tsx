@@ -25,7 +25,6 @@ interface OrderViewProps {
   orderId: string;
 }
 
-
 export default function OrderView({ orderId }: OrderViewProps) {
   const trpc = useTRPC();
 
@@ -34,12 +33,20 @@ export default function OrderView({ orderId }: OrderViewProps) {
       orderId,
     })
   );
-  
+  // Type assertions
   const user = order.user as UserType;
   const tenant = order.tenant as Tenant;
   const image = tenant.image as Media;
   const products = order.products as Product[];
 
+  // Extract product IDs for reviews
+  const productIds = products.map((product) => product.id);
+
+  const { data: reviewsMap } = useSuspenseQuery(
+    trpc.reviews.getMultiple.queryOptions({
+      productIds,
+    })
+  );
 
   const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
@@ -83,7 +90,6 @@ export default function OrderView({ orderId }: OrderViewProps) {
       </nav>
 
       <div className="container mx-auto py-8 px-4 max-w-6xl space-y-8">
-
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -145,8 +151,7 @@ export default function OrderView({ orderId }: OrderViewProps) {
                     Items
                   </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {order.products?.length || 0} Product
-                    {order.products?.length !== 1 ? "s" : ""}
+                    {products.length} Product{products.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
@@ -221,16 +226,17 @@ export default function OrderView({ orderId }: OrderViewProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Products ({order.products?.length || 0})
+              Products ({products.length})
             </h2>
           </div>
 
-          {order.products && order.products.length > 0 ? (
+          {products.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
+                  initialReview={reviewsMap[product.id] || null}
                 />
               ))}
             </div>
@@ -243,7 +249,6 @@ export default function OrderView({ orderId }: OrderViewProps) {
                 </h3>
                 <p className="text-gray-500 mt-2">
                   This order doesn&apos;t contain any products.
-                  {/* `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.eslintreact/no-unescaped-entities */}
                 </p>
               </CardContent>
             </Card>
@@ -266,7 +271,7 @@ export default function OrderView({ orderId }: OrderViewProps) {
 }
 export function OrderViewSkeleton() {
   return (
-    <div className="space-y-6 container mx-auto" >
+    <div className="space-y-6 container mx-auto">
       <div className="flex items-center justify-between">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-10 w-32" />

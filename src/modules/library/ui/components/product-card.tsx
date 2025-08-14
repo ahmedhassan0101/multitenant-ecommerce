@@ -14,9 +14,13 @@ import { Media, Product } from "@/payload-types";
 
 interface ProductCardProps {
   product: Product;
+  initialReview?: any;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  initialReview,
+}: ProductCardProps) {
   const formattedPrice = (product.price / 100).toFixed(2);
   const image = product.image as Media;
 
@@ -101,7 +105,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       </CardContent>
 
       <CardFooter className="pt-0">
-        <ProductReviewForm productId={product.id} />
+        <ProductReviewForm
+          productId={product.id}
+       
+          initialData={initialReview}
+        />
       </CardFooter>
     </Card>
   );

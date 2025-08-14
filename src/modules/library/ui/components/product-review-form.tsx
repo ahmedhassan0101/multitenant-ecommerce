@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,102 +17,139 @@ import { toast } from "sonner";
 import StarPicker from "@/components/global/star-picker";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 interface ProductReviewFormProps {
   productId: string;
+
+  initialData?: any; // Review object or null
 }
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Please select a rating").max(5),
-  comment: z
+  description: z
     .string()
-    .optional()
+    .min(1, "Please write a review")
     .refine(
-      (val) => !val || val.trim().length <= 500,
-      "Comment must be 500 characters or less"
+      (val) => val.trim().length <= 500,
+      "Review must be 500 characters or less"
     ),
 });
 type ReviewFormData = z.infer<typeof reviewSchema>;
 
 export default function ProductReviewForm({
   productId,
+
+  initialData,
 }: ProductReviewFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  // Track if the form is in preview mode (readonly) based on presence of initial review data
+  const [isPreview, setIsPreview] = useState(!!initialData);
+
+  // Mutations
+  const createReview = useMutation(
+    trpc.reviews.create.mutationOptions({
+      onSuccess: (newReview) => {
+        // Update the multiple reviews cache
+        const productIds = [productId];
+        queryClient.setQueryData(
+          trpc.reviews.getMultiple.queryKey({ productIds }),
+          (oldData: Record<string, any> | undefined) => ({
+            ...oldData,
+            [productId]: newReview,
+          })
+        );
+
+        setIsPreview(true);
+        toast.success("Review submitted successfully!");
+      },
+      onError: (error) => {
+        toast.error(error.message);
+        setIsPreview(false);
+      },
+    })
+  );
+
+  const updateReview = useMutation(
+    trpc.reviews.update.mutationOptions({
+      onSuccess: (updatedReview) => {
+        // Update the multiple reviews cache
+        const productIds = [productId];
+        queryClient.setQueryData(
+          trpc.reviews.getMultiple.queryKey({ productIds }),
+          (oldData: Record<string, any> | undefined) => ({
+            ...oldData,
+            [productId]: updatedReview,
+          })
+        );
+
+        setIsPreview(true);
+        toast.success("Review updated successfully!");
+      },
+      onError: (error) => {
+        toast.error(error.message);
+        setIsPreview(false);
+      },
+    })
+  );
 
   const form = useForm<ReviewFormData>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
-      rating: 0,
-      comment: "",
+      rating: initialData?.rating || 0,
+      description: initialData?.description || "",
     },
   });
 
-  // const handleReviewSubmit = (reviewData: any) => {
-  //   console.log("Review data:", reviewData);
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        rating: initialData.rating,
+        description: initialData.description,
+      });
+      setIsPreview(true);
+    } else {
+      form.reset({
+        rating: 0,
+        description: "",
+      });
+      setIsPreview(false);
+    }
+  }, [initialData, form, setIsPreview]);
 
-  //   // TODO: Implement review submission when API is ready
-  //   // Example of what the API call might look like:
-  //   /*
-  //   try {
-  //     await trpc.reviews.create.mutate({
-  //       productId: reviewData.productId,
-  //       orderId: orderId,
-  //       rating: reviewData.rating,
-  //       comment: reviewData.comment,
-  //     });
-  //   } catch (error) {
-  //     console.error("Failed to submit review:", error);
-  //     throw error; // Re-throw to be handled by the form
-  //   }
-  //   */
-
-  //   // Simulate API delay for now
-  //   // await new Promise(resolve => setTimeout(resolve, 1000));
-  // };
-  const handleSubmit = (values: ReviewFormData) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
-
-    // setIsSubmitting(true);
-
-    // try {
-    //   if (onSubmit) {
-    //     await onSubmit({
-    //       ...data,
-    //       productId,
-    //       comment: data.comment?.trim() || "",
-    //     });
-    //   }
-
-    //   // Reset form after successful submission
-    //   form.reset();
-    //   toast.success("Review submitted successfully!", {
-    //     description: "Thank you for your feedback!",
-    //   });
-    // } catch (error) {
-    //   console.error("Error submitting review:", error);
-    //   toast.error("Failed to submit review", {
-    //     description: "Please try again later.",
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+  const onSubmit = (values: ReviewFormData) => {
+    if (initialData) {
+      updateReview.mutate({
+        reviewId: initialData.id,
+        rating: values.rating,
+        description: values.description,
+      });
+    } else {
+      createReview.mutate({
+        productId,
+        rating: values.rating,
+        description: values.description,
+      });
+    }
   };
 
-  const watchedComment = form.watch("comment") || "";
+  const watchedDescription = form.watch("description") || "";
+  const isLoading = createReview.isPending || updateReview.isPending;
 
   return (
     <Card className="mt-6 w-full bg-gradient-to-br gap-2 from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border-blue-200 dark:border-gray-700">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Liked it? Give it a rating
+          {isPreview ? "Your rating:" : "Liked it? Give it a rating"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Rating Stars */}
             <FormField
               control={form.control}
@@ -121,9 +158,9 @@ export default function ProductReviewForm({
                 <FormItem>
                   <FormControl>
                     <StarPicker
-                      // value={field.value}
-                      // onChange={field.onChange}
-                      {...field}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isPreview}
                       error={fieldState.error?.message}
                     />
                   </FormControl>
@@ -134,11 +171,11 @@ export default function ProductReviewForm({
             {/* Comment Textarea */}
             <FormField
               control={form.control}
-              name="comment"
+              name="description"
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Your Review (Optional)
+                    Your Review
                   </FormLabel>
                   <FormControl>
                     <div className="space-y-2">
@@ -148,10 +185,11 @@ export default function ProductReviewForm({
                         rows={4}
                         className="resize-none border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                         maxLength={500}
+                        disabled={isPreview}
                       />
                       <div className="flex justify-between items-center">
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {watchedComment.length}/500 characters
+                          {watchedDescription.length}/500 characters
                         </div>
                         {fieldState.error && (
                           <FormMessage className="text-xs" />
@@ -163,21 +201,36 @@ export default function ProductReviewForm({
               )}
             />
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Submitting...</span>
-                </div>
-              ) : (
-                "Submit Review"
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3">
+              {!isPreview && (
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </div>
+                  ) : (
+                    <>{initialData ? "Update Review" : "Post Review"}</>
+                  )}
+                </Button>
               )}
-            </Button>
+              
+              {isPreview && (
+                <Button
+                  type="button"
+                  onClick={() => setIsPreview(false)}
+                  variant="outline"
+                  className="w-full border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/20"
+                >
+                  Edit Review
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
       </CardContent>
