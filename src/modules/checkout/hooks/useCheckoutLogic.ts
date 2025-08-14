@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/app/tenants/[slug]/checkout/useCheckoutLogic.ts
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -61,18 +59,18 @@ export function useCheckoutLogic(tenantSlug: string) {
       clearTenantCart(); // Remove all products from cart after successful purchase
 
       // Invalidate cached queries related to the user's library to ensure fresh data
-      // queryClient.invalidateQueries(trpc.library.getMany.infiniteQueryFilter());
+      queryClient.invalidateQueries(trpc.library.getAll.infiniteQueryFilter());
 
       // Redirect user to the library page
-      // router.push("/library");
+      router.push("/library");
     }
   }, [
     states.success,
     clearTenantCart,
     setStates,
-    // router,
-    // queryClient,
-    // trpc.library.getMany,
+    router,
+    queryClient,
+    trpc.library.getAll,
   ]);
 
   // Effect to handle invalid products
