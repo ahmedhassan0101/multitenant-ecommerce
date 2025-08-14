@@ -14,6 +14,8 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
+
+  
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.categories.getAll.queryOptions());
 
@@ -30,6 +32,9 @@ export default async function Layout({
     </section>
   );
 }
+
+
+
 
 // let data = null;
 //   let error = null;
