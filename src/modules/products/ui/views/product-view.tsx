@@ -6,11 +6,12 @@ import { Progress } from "@/components/ui/progress";
 import { formatCurrency, generateTenantURL } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { CheckIcon, LinkIcon, StarIcon } from "lucide-react";
+import { CheckIcon, LinkIcon, StarIcon, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { Fragment } from "react";
 import dynamic from "next/dynamic";
+import { Review } from "@/payload-types";
 // import { CartButton } from "../components/cart-button";
 
 const CartButton = dynamic(
@@ -39,7 +40,7 @@ export default function ProductView({
   const { data } = useSuspenseQuery(
     trpc.products.getOne.queryOptions({ id: productId })
   );
-
+  const review = data.review as Review[];
   return (
     <div className="px-4 lg:px-12 py-10">
       {/* Product container with border and background */}
@@ -98,14 +99,14 @@ export default function ProductView({
               {/* Rating for desktop */}
               <div className="hidden lg:flex px-6 py-4 items-center justify-center">
                 <div className="flex items-center gap-2">
-                  <StarRating rating={2} iconClassName="size-4" />
-                  {/* <StarRating
+                  <StarRating
                     rating={data.reviewRating}
-                    iconClassName="size-4"
-                  /> */}
+             
+                  />
+           
 
                   <p className="text-base font-medium">
-                    data.reviewCount ratings
+                    {data.reviewCount} ratings
                   </p>
                 </div>
               </div>
@@ -114,27 +115,45 @@ export default function ProductView({
             {/* Rating for mobile */}
             <div className="block lg:hidden px-6 py-4 items-center justify-center border-b">
               <div className="flex items-center gap-2">
-                {/* <StarRating rating={data.reviewRating} iconClassName="size-4" /> */}
-                <StarRating rating={3} iconClassName="size-4" />
-
+                <StarRating
+                  rating={data.reviewRating}
+                />
                 <p className="text-base font-medium">
-                  data.reviewCount ratings
+                  {data.reviewCount} ratings
                 </p>
               </div>
             </div>
 
             {/* Product description */}
-            <div className="p-6">
+            <div className="p-6 border-b">
               {data.description ? (
                 // <RichText data={data.description} />
                 <p className="font-medium text-muted-foreground italic">
-                  {data.description}
+                  Description: {data.description}
                 </p>
               ) : (
                 <p className="font-medium text-muted-foreground italic">
                   No description provided
                 </p>
               )}
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    reviews ({data.reviewCount})
+                  </h3>
+                </div>
+
+                {/* Reviews List */}
+                <div className="space-y-4">
+                  {data.review.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -184,12 +203,8 @@ export default function ProductView({
 
                   <div className="flex items-center gap-x-1 font-medium">
                     <StarIcon className="size-4 fill-black" />
-
-                    {/* <p>{data.reviewRating}</p> */}
-                    <p>(3)</p>
-
-                    {/* <p className="text-base">{data.reviewCount} ratings</p> */}
-                    <p className="text-base">20 ratings</p>
+                    <p>({data.reviewRating})</p>
+                    <p className="text-base">{data.reviewCount} ratings</p>
                   </div>
                 </div>
 
@@ -200,15 +215,13 @@ export default function ProductView({
                       <div className="font-medium">
                         {stars} {stars === 1 ? "star" : "stars"}
                       </div>
-
                       <Progress
-                        value={stars * 20}
-                        // value={data.ratingDistribution[stars]}
+                        // value={stars * 20}
+                        value={data.ratingDistribution[stars]}
                         className="h-[1lh]"
                       />
-
                       <div className="font-medium">
-                        {stars * 20}%{/* {data.ratingDistribution[stars]}% */}
+                        {data.ratingDistribution[stars]}%
                       </div>
                     </Fragment>
                   ))}
@@ -234,6 +247,49 @@ export const ProductViewSkeleton = () => {
             className="object-cover"
           />
         </div>
+      </div>
+    </div>
+  );
+};
+
+const ReviewCard = ({ review }: { review: Review }) => {
+  return (
+    <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+      {/* Header with user info and rating */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* User Avatar */}
+          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-gray-500" />
+          </div>
+
+          {/* User Details */}
+          {typeof review.user !== "string" && (
+            <div>
+              <h4 className="font-medium text-gray-900">
+                {review.user.username}
+              </h4>
+              <p className="text-sm text-gray-500">{review.user.email}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Rating Stars */}
+        <div className="flex items-center gap-2">
+          <StarRating rating={review.rating} />
+          <span className="text-sm font-medium text-gray-600">
+            {review.rating}/5
+          </span>
+        </div>
+      </div>
+
+      {/* Review Content */}
+      <div className="text-gray-700 leading-relaxed">
+        {review.description.split("\n").map((line, index) => (
+          <p key={index} className="mb-1">
+            {line}
+          </p>
+        ))}
       </div>
     </div>
   );

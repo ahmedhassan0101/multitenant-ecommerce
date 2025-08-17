@@ -18,8 +18,8 @@ import {
   ArrowLeftIcon,
 } from "lucide-react";
 import Link from "next/link";
-import ProductCard from "../components/product-card";
-import { Media, Product, Tenant, User as UserType } from "@/payload-types";
+import ProductCard from "../components/order-view/product-card";
+import Footer from "@/modules/home/ui/Footer";
 
 interface OrderViewProps {
   orderId: string;
@@ -33,14 +33,8 @@ export default function OrderView({ orderId }: OrderViewProps) {
       orderId,
     })
   );
-  // Type assertions
-  const user = order.user as UserType;
-  const tenant = order.tenant as Tenant;
-  const image = tenant.image as Media;
-  const products = order.products as Product[];
-
   // Extract product IDs for reviews
-  const productIds = products.map((product) => product.id);
+  const productIds = order.products.map((product) => product.id);
 
   const { data: reviewsMap } = useSuspenseQuery(
     trpc.reviews.getMultiple.queryOptions({
@@ -151,7 +145,7 @@ export default function OrderView({ orderId }: OrderViewProps) {
                     Items
                   </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {products.length} Product{products.length !== 1 ? "s" : ""}
+                    {order.products.length} Product{order.products.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
@@ -181,11 +175,11 @@ export default function OrderView({ orderId }: OrderViewProps) {
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm space-y-2">
                   <p className="text-sm">
                     <span className="font-medium">Name:</span>{" "}
-                    {user.username || "N/A"}
+                    {order.user.username || "N/A"}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Email:</span>{" "}
-                    {user?.email || "N/A"}
+                    {order.user?.email || "N/A"}
                   </p>
                 </div>
               </div>
@@ -198,10 +192,10 @@ export default function OrderView({ orderId }: OrderViewProps) {
                 </h4>
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm space-y-3">
                   <div className="flex items-center space-x-3">
-                    {image?.url && (
+                    {order.tenant.image?.url && (
                       <Image
-                        src={image.url ?? ""}
-                        alt={image.alt || tenant.name}
+                        src={order.tenant.image?.url ?? ""}
+                        alt={order.tenant.image.alt || order.tenant.name}
                         width={40}
                         height={40}
                         className="rounded-lg object-cover"
@@ -209,10 +203,10 @@ export default function OrderView({ orderId }: OrderViewProps) {
                     )}
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {tenant?.name || "N/A"}
+                        {order.tenant?.name || "N/A"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        @{tenant?.slug || "N/A"}
+                        @{order.tenant?.slug || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -226,13 +220,13 @@ export default function OrderView({ orderId }: OrderViewProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Products ({products.length})
+              Products ({order.products.length})
             </h2>
           </div>
 
-          {products.length > 0 ? (
+          {order.products.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {products.map((product) => (
+              {order.products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -266,6 +260,7 @@ export default function OrderView({ orderId }: OrderViewProps) {
           </Button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

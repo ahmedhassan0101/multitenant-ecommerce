@@ -109,6 +109,22 @@ export const authRouter = createTRPCRouter({
 
     return data;
   }),
+
+    logout: baseProcedure.mutation(async ({ ctx }) => {
+    try {
+      // Clear the authentication cookie (this effectively logs out the user)
+      await clearAuthCookie({
+        prefix: ctx.payload.config.cookiePrefix,
+      });
+
+      return { success: true };
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Failed to logout: ${error}`,
+      });
+    }
+  }),
 });
 
 interface AuthCookieProps {
@@ -127,4 +143,9 @@ const generateAuthCookie = async ({ prefix, value }: AuthCookieProps) => {
     // sameSite: "none",
     // domain: ""
   });
+};
+
+const clearAuthCookie = async ({ prefix }: { prefix: string }) => {
+  const cookies = await getCookies();
+  cookies.delete(`${prefix}-token`);
 };

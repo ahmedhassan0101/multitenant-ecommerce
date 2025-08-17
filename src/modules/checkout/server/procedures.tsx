@@ -123,7 +123,7 @@ export const checkoutRouter = createTRPCRouter({
       // const tenant = tenantsData.docs[0];
       const tenant = products.docs[0].tenant as Tenant; // Assuming all products share the same tenant
 
-       if (!tenant || !tenant.stripeAccountId) {
+      if (!tenant || !tenant.stripeAccountId) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Tenant or Stripe account not found",
@@ -181,7 +181,10 @@ export const checkoutRouter = createTRPCRouter({
           // payment_intent_data: {
           //   application_fee_amount: platformFeeAmount,
           // },
-        }
+        },
+        // tenant.stripeAccountId && tenant.stripeAccountId !== "test"
+        //   ? { stripeAccount: tenant.stripeAccountId }
+        //   : {}
         // {
         //   stripeAccount: tenant.stripeAccountId,
         // }

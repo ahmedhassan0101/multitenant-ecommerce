@@ -3,14 +3,14 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { Poppins } from "next/font/google";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { MenuIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NavbarSidebar } from "./NavbarSidebar";
 import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const poppins = Poppins({
   subsets: ["latin"],
@@ -28,11 +28,29 @@ const navbarItems = [
 
 export default function Navbar() {
   const currentPath = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
   const { data: session } = useQuery(trpc.auth.session.queryOptions());
 
+  const logoutMutation = useMutation(
+    trpc.auth.logout.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(trpc.auth.session.queryFilter());
+        router.push("/");
+      },
+      onError: (error) => {
+        console.error("Logout failed:", error);
+      },
+    })
+  );
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
   return (
     <nav className="flex justify-between h-20 font-medium bg-white border-b">
       <Link className="flex items-center pl-6" href="/">
@@ -59,6 +77,17 @@ export default function Navbar() {
 
       {session?.user ? (
         <div className="hidden lg:flex">
+          <p className="h-full px-12 text-xl font-bold border-l flex items-center  hover:bg-pink-400">
+           User: {session.user.username}
+          </p>
+          <Button
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            variant={"secondary"}
+            className="h-full px-12 text-lg transition-colors bg-white border-t-0 border-b-0 border-l border-r-0 rounded-none hover:bg-pink-400"
+          >
+            Log out
+          </Button>
           <Button
             asChild
             className="h-full px-12 text-lg text-white transition-colors bg-black border-t-0 border-b-0 border-l border-r-0 rounded-none hover:bg-pink-400 hover:text-black"
@@ -75,9 +104,7 @@ export default function Navbar() {
             variant={"secondary"}
             className="h-full px-12 text-lg transition-colors bg-white border-t-0 border-b-0 border-l border-r-0 rounded-none hover:bg-pink-400"
           >
-            <Link prefetch href="/sign-in">
-              Log in
-            </Link>
+            <Link href="/sign-in">Log in</Link>
           </Button>
           <Button
             asChild

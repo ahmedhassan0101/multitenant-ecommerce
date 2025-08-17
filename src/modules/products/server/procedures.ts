@@ -22,10 +22,22 @@ export const productRouter = createTRPCRouter({
         depth: 2,
         id,
       });
+
+      const reviews = await ctx.payload.find({
+        collection: "reviews",
+        depth: 1,
+        where: {
+          product: { equals: id },
+        },
+      });
+
+      const ratingMetrics = calculateRatingMetrics(reviews.docs);
       return {
         ...product,
         image: product.image as Media | null,
         tenant: product.tenant as Tenant & { image: Media | null },
+        review: reviews.docs,
+        ...ratingMetrics,
       };
     }),
 
@@ -155,14 +167,96 @@ export const productRouter = createTRPCRouter({
         limit: limit,
         sort: sortValue,
       });
+      const productIds = products.docs.map((product) => product.id);
 
+      const allReviews = await ctx.payload.find({
+        collection: "reviews",
+        where: {
+          product: {
+            in: productIds,
+          },
+        },
+        pagination: false,
+        select: {
+          product: true,
+          rating: true,
+        },
+      });
+
+      const reviewsByProduct = allReviews.docs.reduce(
+        (acc, review) => {
+          const productId =
+            typeof review.product === "string"
+              ? review.product
+              : review.product.id;
+
+          if (!acc[productId]) {
+            acc[productId] = [];
+          }
+          acc[productId].push(review);
+
+          return acc;
+        },
+        {} as Record<string, Array<{ rating: number }>>
+      );
+
+      const calculateReviewMetrics = (
+        productReviews: Array<{ rating: number }>
+      ) => {
+        const totalReviews = productReviews.length;
+
+        if (totalReviews === 0) {
+          return {
+            reviewRating: 0,
+            reviewCount: 0,
+            ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+          };
+        }
+
+        let totalRatingSum = 0;
+        const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+        productReviews.forEach((review) => {
+          const rating = review.rating;
+          totalRatingSum += rating;
+
+          if (rating >= 1 && rating <= 5) {
+            ratingCounts[rating as keyof typeof ratingCounts]++;
+          }
+        });
+
+        const reviewRating = Number((totalRatingSum / totalReviews).toFixed(1));
+
+        const ratingDistribution = Object.entries(ratingCounts).reduce(
+          (acc, [rating, count]) => {
+            acc[Number(rating)] = Math.round((count / totalReviews) * 100);
+            return acc;
+          },
+          {} as Record<number, number>
+        );
+
+        return {
+          reviewRating,
+          reviewCount: totalReviews,
+          ratingDistribution,
+        };
+      };
+
+      const productsWithReviews = products.docs.map((product) => {
+        const productReviews = reviewsByProduct[product.id] || [];
+        const reviewMetrics = calculateReviewMetrics(productReviews);
+
+        return {
+          ...product,
+          image: product.image as Media | null,
+          tenant: product.tenant as Tenant & { image: Media | null },
+          reviewRating: reviewMetrics.reviewRating,
+          reviewCount: reviewMetrics.reviewCount,
+          ratingDistribution: reviewMetrics.ratingDistribution,
+        };
+      });
       return {
-        products: products.docs.map((doc) => ({
-          ...doc,
-          image: doc.image as Media | null, // Cast product image to Media or null to enforce proper type
-          tenant: doc.tenant as Tenant & { image: Media | null }, // Cast tenant field to include image property
-        })),
-        // products: products.docs,
+        products: productsWithReviews,
         pagination: {
           page: products.page,
           limit: products.limit,
@@ -174,6 +268,24 @@ export const productRouter = createTRPCRouter({
           prevPage: products.prevPage,
         },
       };
+      // return {
+      //   products: products.docs.map((doc) => ({
+      //     ...doc,
+      //     image: doc.image as Media | null, // Cast product image to Media or null to enforce proper type
+      //     tenant: doc.tenant as Tenant & { image: Media | null }, // Cast tenant field to include image property
+      //   })),
+      //   // products: products.docs,
+      //   pagination: {
+      //     page: products.page,
+      //     limit: products.limit,
+      //     totalPages: products.totalPages,
+      //     totalDocs: products.totalDocs,
+      //     hasNextPage: products.hasNextPage,
+      //     hasPrevPage: products.hasPrevPage,
+      //     nextPage: products.nextPage,
+      //     prevPage: products.prevPage,
+      //   },
+      // };
       //  !OR
       //   return {
       //   ...products,
@@ -184,6 +296,46 @@ export const productRouter = createTRPCRouter({
       // };
     }),
 });
+
+const calculateRatingMetrics = (reviewsData: Array<{ rating: number }>) => {
+  const totalReviews = reviewsData.length;
+
+  if (totalReviews === 0) {
+    return {
+      reviewRating: 0,
+      reviewCount: 0,
+      ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+    };
+  }
+  // Initialize counters
+  let totalRatingSum = 0;
+  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  // Single loop to calculate everything
+  reviewsData.forEach((review) => {
+    const rating = review.rating;
+    totalRatingSum += rating;
+    // Count each rating (with validation)
+    if (rating >= 1 && rating <= 5) {
+      ratingCounts[rating as keyof typeof ratingCounts]++;
+    }
+  });
+  // Calculate average rating
+  const reviewRating = Number((totalRatingSum / totalReviews).toFixed(1));
+  // Convert counts to percentages
+  const ratingDistribution = Object.entries(ratingCounts).reduce(
+    (acc, [rating, count]) => {
+      acc[Number(rating)] = Math.round((count / totalReviews) * 100);
+      return acc;
+    },
+    {} as Record<number, number>
+  );
+
+  return {
+    reviewRating,
+    reviewCount: totalReviews,
+    ratingDistribution,
+  };
+};
 //  .query(async ({ ctx, input }) => {
 //       const { categorySlug, isSubcategory, minPrice, maxPrice, sort, tags } =
 //         input;
@@ -327,4 +479,3 @@ export const productRouter = createTRPCRouter({
 //             : [baseCondition],
 //         };
 //       }
-  

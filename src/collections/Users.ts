@@ -9,13 +9,17 @@ const defaultTenantArrayField = tenantsArrayField({
 
   arrayFieldAccess: {
     read: () => true,
-    create: ({ req }) => isSuperAdmin(req.user),
-    update: ({ req }) => isSuperAdmin(req.user),
+    create: () => true,
+    update: () => true,
+    // create: ({ req }) => isSuperAdmin(req.user),
+    // update: ({ req }) => isSuperAdmin(req.user),
   },
   tenantFieldAccess: {
     read: () => true,
-    create: ({ req }) => isSuperAdmin(req.user),
-    update: ({ req }) => isSuperAdmin(req.user),
+    create: () => true,
+    update: () => true,
+    // create: ({ req }) => isSuperAdmin(req.user),
+    // update: ({ req }) => isSuperAdmin(req.user),
   },
 });
 

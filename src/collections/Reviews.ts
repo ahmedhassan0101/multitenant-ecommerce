@@ -1,15 +1,15 @@
 // src\collections\Reviews.ts
-import { isSuperAdmin } from "@/lib/access";
+// import { isSuperAdmin } from "@/lib/access";
 import type { CollectionConfig } from "payload";
 
 export const Reviews: CollectionConfig = {
   slug: "reviews",
-  access: {
-    read: ({ req }) => isSuperAdmin(req.user),
-    create: ({ req }) => isSuperAdmin(req.user),
-    delete: ({ req }) => isSuperAdmin(req.user),
-    update: ({ req }) => isSuperAdmin(req.user),
-  },
+  // access: {
+  //   read: ({ req }) => isSuperAdmin(req.user),
+  //   create: ({ req }) => isSuperAdmin(req.user),
+  //   delete: ({ req }) => isSuperAdmin(req.user),
+  //   update: ({ req }) => isSuperAdmin(req.user),
+  // },
   admin: {
     useAsTitle: "description",
   },
