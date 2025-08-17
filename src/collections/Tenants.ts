@@ -19,9 +19,9 @@ export const Tenants: CollectionConfig = {
       type: "text",
       required: true,
       label: "Store Name",
-      access: {
-        update: ({ req }) => isSuperAdmin(req.user),
-      },
+      // access: {
+      //   update: ({ req }) => isSuperAdmin(req.user),
+      // },
       admin: {
         description: "The name of the store (e.g., John Doe's Store)",
       },
@@ -32,6 +32,9 @@ export const Tenants: CollectionConfig = {
       index: true,
       required: true,
       unique: true,
+      access: {
+        update: ({ req }) => isSuperAdmin(req.user), // Allow super admins to update
+      },
       admin: {
         description: "The subdomain of the store (e.g., [slug].funroad.com)",
       },

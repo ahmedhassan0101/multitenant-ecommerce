@@ -1,3 +1,4 @@
+import { Media, Product, Tenant, User } from "@/payload-types";
 import { createTRPCRouter, protectedProcedures } from "@/trpc/init";
 import { z } from "zod";
 
@@ -33,7 +34,24 @@ export const libraryRoute = createTRPCRouter({
           );
         }
         const order = orderData.docs[0];
-        return order;
+
+        return {
+          ...order,
+          user: order.user as User,
+          tenant: {
+            ...(order.tenant as Tenant),
+            image: (order.tenant as Tenant).image as Media | null,
+          },
+          products: (order.products as Product[]).map((product) => ({
+            ...product,
+            image: product.image as Media | null,
+            tenant: {
+              ...(product.tenant as Tenant),
+              image: (product.tenant as Tenant).image as Media | null,
+            },
+          })),
+        };
+        // return order;
       } catch (error) {
         console.error("Error fetching order:", error);
         throw new Error("Failed to fetch order details");
@@ -57,8 +75,26 @@ export const libraryRoute = createTRPCRouter({
         limit,
         where: { user: { equals: ctx.session.user.id } },
       });
-
-      return ordersData;
+      return {
+        ...ordersData,
+        docs: ordersData.docs.map((order) => ({
+          ...order,
+          user: order.user as User,
+          tenant: {
+            ...(order.tenant as Tenant),
+            image: (order.tenant as Tenant).image as Media | null,
+          },
+          products: (order.products as Product[]).map((product) => ({
+            ...product,
+            tenant: {
+              ...(product.tenant as Tenant),
+              image: (product.tenant as Tenant).image as Media | null,
+            },
+            image: product.image as Media | null,
+          })),
+        })),
+      };
+      // return ordersData;
       // return {
       //   ...ordersData,
       //   docs: ordersData.docs.map((order) => ({

@@ -1,4 +1,3 @@
-
 import {
   ArrowLeftIcon,
   PackageIcon,
@@ -8,9 +7,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { Suspense } from "react";
-import OrdersStats from "../components/orders-stats";
-import OrdersList, { OrdersListSkeleton } from "../components/orders-list";
-import OrdersFilters from "../components/orders-filters";
+import OrdersStats from "../components/library-view/orders-stats";
+import OrdersList, {
+  OrdersListSkeleton,
+} from "../components/library-view/orders-list";
+import OrdersFilters from "../components/library-view/orders-filters";
+import Footer from "@/modules/home/ui/Footer";
 
 export default function LibraryView() {
   return (
@@ -140,6 +142,7 @@ export default function LibraryView() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

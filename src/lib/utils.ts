@@ -33,3 +33,45 @@ export function formatCurrency(value: number | string) {
 export function generateTenantURL(tenantSlug: string) {
   return `/tenants/${tenantSlug}`;
 }
+
+export const calculateRatingMetrics = (
+  reviewsData: Array<{ rating: number }>
+) => {
+  const totalReviews = reviewsData.length;
+
+  if (totalReviews === 0) {
+    return {
+      reviewRating: 0,
+      reviewCount: 0,
+      ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+    };
+  }
+  // Initialize counters
+  let totalRatingSum = 0;
+  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  // Single loop to calculate everything
+  reviewsData.forEach((review) => {
+    const rating = review.rating;
+    totalRatingSum += rating;
+    // Count each rating (with validation)
+    if (rating >= 1 && rating <= 5) {
+      ratingCounts[rating as keyof typeof ratingCounts]++;
+    }
+  });
+  // Calculate average rating
+  const reviewRating = Number((totalRatingSum / totalReviews).toFixed(1));
+  // Convert counts to percentages
+  const ratingDistribution = Object.entries(ratingCounts).reduce(
+    (acc, [rating, count]) => {
+      acc[Number(rating)] = Math.round((count / totalReviews) * 100);
+      return acc;
+    },
+    {} as Record<number, number>
+  );
+
+  return {
+    reviewRating,
+    reviewCount: totalReviews,
+    ratingDistribution,
+  };
+};

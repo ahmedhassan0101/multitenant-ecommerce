@@ -105,11 +105,7 @@ export default function ProductCard({
       </CardContent>
 
       <CardFooter className="pt-0">
-        <ProductReviewForm
-          productId={product.id}
-       
-          initialData={initialReview}
-        />
+        <ProductReviewForm productId={product.id} initialData={initialReview} />
       </CardFooter>
     </Card>
   );

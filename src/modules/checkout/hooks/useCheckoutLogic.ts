@@ -36,7 +36,7 @@ export function useCheckoutLogic(tenantSlug: string) {
           toast.error("You need to be signed in to purchase.");
           router.push("/sign-in");
         } else {
-          toast.error("Checkout failed. Please try again.");
+          toast.error(`Checkout failed. Please try again. : ${error}`);
           // You could also set a state for cancellation if needed
           setStates({ ...states, cancel: true });
         }

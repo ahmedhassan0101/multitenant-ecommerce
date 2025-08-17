@@ -1,7 +1,6 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Media, Order, Product, User } from "@/payload-types";
+import { Order, Product, User } from "@/payload-types";
 import {
   formatCurrency,
   // formatDate
@@ -19,13 +18,13 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ProductItem } from "./ProductItem";
 
 interface OrderCardProps {
   order: Order;
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
-  // const orderDate = formatDate(new Date(order.createdAt));
   const orderDate = new Date(order.createdAt).toLocaleDateString("ar-EG", {
     weekday: "long",
     year: "numeric",
@@ -97,12 +96,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             </div>
             <div className="flex items-center gap-1">
               <UserIcon className="w-4 h-4" />
-              <span>{user.username || user.email}</span>
+              <span>{user.username || user.email}</span>.
+             
             </div>
             <div className="flex items-center gap-1">
               <PackageIcon className="w-4 h-4" />
               <span>
-                {products.length} item{products.length > 1 ? "s" : ""}
+                {products.length} item
+                {products.length > 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -125,6 +126,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {products.map((product) => (
             <ProductItem key={product.id} product={product} />
+            //  Property 'id' does not exist on type 'string | Product'.
+            // Property 'id' does not exist on type 'string'
           ))}
         </div>
       </div>
@@ -145,52 +148,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             Download Invoice
           </Button>
           {/* )} */}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface ProductItemProps {
-  product: Product;
-}
-
-const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const image = product.image as Media;
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors duration-200">
-      {/* Product Image */}
-      <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-        {image ? (
-          <Image
-            src={image?.url ?? ""}
-            alt={image.alt || product.name}
-            fill
-            className="object-cover"
-            sizes="64px"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <PackageIcon className="w-6 h-6 text-gray-400" />
-          </div>
-        )}
-      </div>
-
-      {/* Product Info */}
-      <div className="flex-1 min-w-0">
-        <h5 className="font-medium text-gray-900 truncate mb-1">
-          {product.name}
-        </h5>
-        <p className="text-sm text-gray-500 truncate">{product.description}</p>
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-sm font-medium text-gray-900">
-            {formatCurrency(product.price)}
-          </span>
-          {product.tenant && typeof product.tenant === "object" && (
-            <span className="text-xs text-gray-500">
-              by {product.tenant.name}
-            </span>
-          )}
         </div>
       </div>
     </div>

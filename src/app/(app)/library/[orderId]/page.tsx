@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src\app\(app)\library\[orderId]\page.tsx
-import OrderViewSkeleton from "@/modules/library/ui/components/order-view-skeleton";
+import OrderViewSkeleton from "@/modules/library/ui/components/library-view/order-view-skeleton";
 import OrderView from "@/modules/library/ui/views/order-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";

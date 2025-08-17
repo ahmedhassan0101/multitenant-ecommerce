@@ -152,7 +152,13 @@ async function handleCheckoutCompleted(
   // We use `.map` and a robust check to ensure valid data.
   const productIdsFromStripe = lineItems
     .map((item) => item.price?.product.metadata?.id)
+
     .filter(Boolean); // Filter out any undefined or null values
+  // This is crucial for tracking which connected account received the funds.
+  // Find the Stripe Account ID from the line items' metadata
+  const stripeAccountId = lineItems[0].price?.product.metadata?.stripeAccountId;
+  console.log("🚀 ~ Completed ~ stripeAccountId:", stripeAccountId);
+  console.log("🚀 ~ Completed ~ event.account:", event.account);
 
   await payload.create({
     collection: "orders",
@@ -162,7 +168,7 @@ async function handleCheckoutCompleted(
       tenant: metadata.tenantId,
       totalAmount: session.amount_total || 0,
       products: productIdsFromStripe,
-      stripeAccountId: event.id,
+      stripeAccountId: event.account,
       stripeCheckoutSessionId: session.id,
     },
   });
