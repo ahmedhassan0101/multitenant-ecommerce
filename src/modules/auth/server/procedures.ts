@@ -3,6 +3,7 @@ import { headers as getHeaders } from "next/headers";
 import { loginSchema, registerSchema } from "../schemas";
 import { TRPCError } from "@trpc/server";
 import { cookies as getCookies } from "next/headers";
+import { stripe } from "@/lib/stripe";
 
 const ERROR_MESSAGES = {
   USERNAME_TAKEN: "Username already taken",
@@ -40,6 +41,17 @@ export const authRouter = createTRPCRouter({
         });
       }
 
+      // Create a new Stripe account for the user
+      const account = await stripe.accounts.create({});
+
+      // If the Stripe account creation fails, throw an error
+      if (!account) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create Stripe account",
+        });
+      }
+
       // Create a new tenant for the user
 
       const tenant = await ctx.payload.create({
@@ -47,7 +59,7 @@ export const authRouter = createTRPCRouter({
         data: {
           name: username,
           slug: username,
-          stripeAccountId: "test",
+          stripeAccountId: account.id,
         },
       });
 
@@ -110,7 +122,7 @@ export const authRouter = createTRPCRouter({
     return data;
   }),
 
-    logout: baseProcedure.mutation(async ({ ctx }) => {
+  logout: baseProcedure.mutation(async ({ ctx }) => {
     try {
       // Clear the authentication cookie (this effectively logs out the user)
       await clearAuthCookie({

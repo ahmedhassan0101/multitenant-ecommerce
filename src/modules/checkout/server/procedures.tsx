@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Media, Tenant } from "@/payload-types";
 import {
   baseProcedure,
@@ -13,6 +12,58 @@ import { CheckoutMetadata, ProductMetadata } from "../types";
 import { stripe } from "@/lib/stripe";
 import { PLATFORM_FEE_PERCENTAGE } from "@/lib/constants";
 export const checkoutRouter = createTRPCRouter({
+  verify: protectedProcedures.mutation(async ({ ctx }) => {
+    // Fetch the full user document using their session ID (depth: 0 returns raw ID refs)
+    const user = await ctx.payload.findByID({
+      collection: "users",
+      id: ctx.session.user.id,
+      depth: 0, // Fetch only the user document (no related fields)
+    });
+
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    const tenantId = user.tenants?.[0]?.tenant as string;
+
+    // Fetch the tenant document using the extracted tenant ID
+    const tenant = await ctx.payload.findByID({
+      collection: "tenants", // Collection name to query
+      id: tenantId, // Tenant ID to fetch
+    });
+
+    // Throw an error if the tenant does not exist
+    if (!tenant) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Tenant not found",
+      });
+    }
+
+    // Create a Stripe account onboarding link for the tenant
+    const accountLink = await stripe.accountLinks.create({
+      account: tenant.stripeAccountId as string, // Stripe account ID for the tenant
+      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL!}/admin`, // Redirect here if onboarding is canceled
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL!}/admin`, // Redirect here after successful onboarding
+      type: "account_onboarding", // Type of link: onboarding flow
+    });
+
+    // Throw an error if the link creation fails
+    if (!accountLink) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Account link failed",
+      });
+    }
+
+    // Return the Stripe onboarding URL to the client
+    return {
+      url: accountLink.url,
+    };
+  }),
   getProducts: baseProcedure
     .input(
       z.object({
@@ -178,16 +229,16 @@ export const checkoutRouter = createTRPCRouter({
           // Metadata attached directly to the Stripe Checkout Session.
           // This data is available in `event.data.object.metadata` inside the webhook handler.
           // Used to identify the user, tenant, and purchased product IDs at the session level.
-          // payment_intent_data: {
-          //   application_fee_amount: platformFeeAmount,
-          // },
+          payment_intent_data: {
+            application_fee_amount: platformFeeAmount,
+          },
         },
         // tenant.stripeAccountId && tenant.stripeAccountId !== "test"
         //   ? { stripeAccount: tenant.stripeAccountId }
         //   : {}
-        // {
-        //   stripeAccount: tenant.stripeAccountId,
-        // }
+        {
+          stripeAccount: tenant.stripeAccountId,
+        }
       );
 
       if (!checkout.url) {
