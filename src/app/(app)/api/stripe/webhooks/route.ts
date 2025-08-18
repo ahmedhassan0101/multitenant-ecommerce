@@ -48,8 +48,22 @@ export async function POST(req: Request) {
         // Call a dedicated function to handle this specific event type.
         await handleCheckoutCompleted(event, payload);
         break;
-      // case "account.updated":
-      //   break;
+      case "account.updated":
+        const data = event.data.object as Stripe.Account;
+
+        // Update the tenant record whose Stripe account ID matches the updated account
+        await payload.update({
+          collection: "tenants",
+          where: {
+            stripeAccountId: {
+              equals: data.id, // Match tenant by Stripe account ID
+            },
+          },
+          data: {
+            stripeDetailsSubmitted: data.details_submitted, // Update the verification status
+          },
+        });
+        break;
 
       default:
         // Log unhandled events. This helps in debugging and ensures the webhook doesn't fail.
@@ -136,10 +150,10 @@ async function handleCheckoutCompleted(
     session.id,
     {
       expand: ["line_items.data.price.product"],
+    },
+    {
+      stripeAccount: event.account,
     }
-    // {
-    //   stripeAccount: event.account,
-    // }
   );
 
   if (!expandedSession.line_items?.data?.length) {
