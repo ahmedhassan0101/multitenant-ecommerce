@@ -21,6 +21,9 @@ export const productRouter = createTRPCRouter({
         collection: "products",
         depth: 2,
         id,
+        select: {
+          content: false, // Exclude the content field from the results
+        },
       });
 
       const reviews = await ctx.payload.find({
@@ -166,6 +169,9 @@ export const productRouter = createTRPCRouter({
         page: page,
         limit: limit,
         sort: sortValue,
+        select: {
+          content: false, // Exclude the content field from the results
+        },
       });
       const productIds = products.docs.map((product) => product.id);
 
@@ -268,32 +274,6 @@ export const productRouter = createTRPCRouter({
           prevPage: products.prevPage,
         },
       };
-      // return {
-      //   products: products.docs.map((doc) => ({
-      //     ...doc,
-      //     image: doc.image as Media | null, // Cast product image to Media or null to enforce proper type
-      //     tenant: doc.tenant as Tenant & { image: Media | null }, // Cast tenant field to include image property
-      //   })),
-      //   // products: products.docs,
-      //   pagination: {
-      //     page: products.page,
-      //     limit: products.limit,
-      //     totalPages: products.totalPages,
-      //     totalDocs: products.totalDocs,
-      //     hasNextPage: products.hasNextPage,
-      //     hasPrevPage: products.hasPrevPage,
-      //     nextPage: products.nextPage,
-      //     prevPage: products.prevPage,
-      //   },
-      // };
-      //  !OR
-      //   return {
-      //   ...products,
-      // docs: products.docs.map((doc) => ({
-      //   ...doc,
-      //   image: doc.image as Media | null,
-      // })),
-      // };
     }),
 });
 
@@ -336,146 +316,3 @@ const calculateRatingMetrics = (reviewsData: Array<{ rating: number }>) => {
     ratingDistribution,
   };
 };
-//  .query(async ({ ctx, input }) => {
-//       const { categorySlug, isSubcategory, minPrice, maxPrice, sort, tags } =
-//         input;
-//       const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
-
-//       // If no category specified, return all products
-//       if (!categorySlug) {
-//         const whereClause: Where = {};
-
-//         if (minPrice) {
-//           whereClause.price = {
-//             ...(whereClause.price || {}),
-//             greater_than_equal: parseFloat(minPrice),
-//           };
-//         }
-
-//         if (maxPrice) {
-//           whereClause.price = {
-//             ...(whereClause.price || {}),
-//             less_than_equal: parseFloat(maxPrice),
-//           };
-//         }
-//         if (tags && tags.length > 0) {
-//           whereClause["tags.name"] = { in: tags };
-//         }
-//         const products = await ctx.payload.find({
-//           collection: "products",
-//           depth: 1,
-//           pagination: false,
-//           where: whereClause,
-//         });
-
-//         return products.docs;
-//       }
-//       // First, find the category by slug
-//       const categoryResult = await ctx.payload.find({
-//         collection: "categories",
-//         where: {
-//           slug: {
-//             equals: categorySlug,
-//           },
-//         },
-//         depth: 1,
-//         limit: 1,
-//         pagination: false,
-//       });
-
-//       if (!categoryResult.docs.length) {
-//         throw new Error(`Category with slug "${categorySlug}" not found`);
-//       }
-//       const category = categoryResult.docs[0];
-//       let whereClause: Where;
-//       if (isSubcategory) {
-//         // For subcategory: only products that belong to this specific subcategory
-//         whereClause = {
-//           category: {
-//             equals: category.id,
-//           },
-//         };
-//       } else {
-//         // For parent category: products from this category + all its subcategories
-//         const subcategoryIds =
-//           category.subcategories?.docs?.map((sub: any) => sub.id) || [];
-//         whereClause = {
-//           or: [
-//             // Products directly in this category
-//             {
-//               category: {
-//                 equals: category.id,
-//               },
-//             },
-//             // Products in any of the subcategories
-//             ...(subcategoryIds.length > 0
-//               ? [
-//                   {
-//                     category: {
-//                       in: subcategoryIds,
-//                     },
-//                   },
-//                 ]
-//               : []),
-//           ],
-//         };
-//       }
-
-//       //  Add minPrice/maxPrice filtering if present
-//       if (minPrice || maxPrice) {
-//         whereClause = {
-//           and: [
-//             whereClause,
-//             {
-//               price: {
-//                 ...(minPrice
-//                   ? { greater_than_equal: parseFloat(minPrice) }
-//                   : {}),
-//                 ...(maxPrice ? { less_than_equal: parseFloat(maxPrice) } : {}),
-//               },
-//             },
-//           ],
-//         };
-//       }
-//       if (tags && tags.length > 0) {
-//         whereClause["tags.name"] = { in: tags };
-//       }
-//       const products = await ctx.payload.find({
-//         collection: "products",
-//         where: whereClause,
-//         depth: 1,
-//         pagination: false,
-//         sort: sortValue,
-//       });
-
-//       return products.docs;
-//     }
-// const baseCondition = {
-//       category: {
-//         equals: category.id,
-//       },
-//     };
-
-//  if (isSubcategory) {
-//         // For subcategory: only products that belong to this specific subcategory
-//         whereClause = baseCondition;
-//       } else {
-//         // For parent category: products from this category + all its subcategories
-//         const subcategoryIds =
-//           category.subcategories?.docs?.map((sub: any) => sub.id) || [];
-
-//         const subcategoryCondition =
-//           subcategoryIds.length > 0
-//             ? {
-//                 category: {
-//                   in: subcategoryIds,
-//                 },
-//               }
-//             : null;
-
-//         whereClause = {
-//           or: subcategoryCondition
-//             ? [baseCondition, subcategoryCondition]
-//             : [baseCondition],
-//         };
-//       }
