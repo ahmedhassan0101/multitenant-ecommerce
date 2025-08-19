@@ -237,3 +237,29 @@ export default function ProductReviewForm({
     </Card>
   );
 }
+
+export function ProductReviewFormSkeleton() {
+  return (
+    <div className="mt-6 w-full animate-pulse">
+      <div className="h-8 w-40 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
+
+      <div className="space-y-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border p-4 rounded-lg">
+        {/* Stars skeleton */}
+        <div className="flex space-x-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+          ))}
+        </div>
+
+        {/* Textarea skeleton */}
+        <div>
+          <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 mb-2 rounded" />
+          <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-md" />
+        </div>
+
+        {/* Button skeleton */}
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md" />
+      </div>
+    </div>
+  );
+}
