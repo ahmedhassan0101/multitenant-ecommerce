@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Tag, Folder } from "lucide-react";
-import ProductReviewForm from "./product-review-form";
+import ProductReviewForm, { ProductReviewFormSkeleton } from "./product-review-form";
 import { Media, Product } from "@/payload-types";
+import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Suspense } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -51,10 +53,11 @@ export default function ProductCard({
             {product.name}
           </h3>
         </div>
-        {product.description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mt-2">
-            {product.description}
-          </p>
+        {product.content && (
+          // <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mt-2">
+          //   {product.description}
+          // </p>
+          <RichText data={product.content} />
         )}
       </CardHeader>
 
@@ -105,7 +108,12 @@ export default function ProductCard({
       </CardContent>
 
       <CardFooter className="pt-0">
-        <ProductReviewForm productId={product.id} initialData={initialReview} />
+        <Suspense fallback={<ProductReviewFormSkeleton />}>
+          <ProductReviewForm
+            productId={product.id}
+            initialData={initialReview}
+          />
+        </Suspense>
       </CardFooter>
     </Card>
   );

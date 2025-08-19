@@ -5,6 +5,7 @@ import z from "zod";
 import { Sort, Where } from "payload";
 import { sortValues } from "@/lib/constants";
 import { Media, Tenant } from "@/payload-types";
+import { TRPCError } from "@trpc/server";
 
 const sortMap: Record<(typeof sortValues)[number], Sort> = {
   curated: "-createdAt",
@@ -26,6 +27,12 @@ export const productRouter = createTRPCRouter({
         },
       });
 
+      if (product.isArchived) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
       const reviews = await ctx.payload.find({
         collection: "reviews",
         depth: 1,
@@ -130,9 +137,23 @@ export const productRouter = createTRPCRouter({
       }
 
       // Build conditions array
-      const conditions = [categoryWhereClause].filter(
-        (condition) => Object.keys(condition).length > 0
-      );
+
+      // const conditions = [categoryWhereClause].filter(
+      //   (condition) => Object.keys(condition).length > 0
+      // );
+      // OR
+      // conditions.push({
+      //   isArchived: {
+      //     not_equals: true,
+      //   },
+      // });
+
+      const conditions = [
+        { isArchived: { not_equals: true } },
+        ...[categoryWhereClause].filter(
+          (condition) => Object.keys(condition).length > 0
+        ),
+      ];
 
       // Add price filtering if present
       if (minPrice || maxPrice) {
@@ -154,6 +175,8 @@ export const productRouter = createTRPCRouter({
       // Apply tenant filter if a tenant slug is provided
       if (tenantSlug) {
         conditions.push({ "tenant.slug": { equals: tenantSlug } });
+      } else {
+        conditions.push({ isPrivate: { not_equals: true } });
       }
 
       // Combine all conditions

@@ -74,7 +74,12 @@ export const checkoutRouter = createTRPCRouter({
       const data = await ctx.payload.find({
         collection: "products",
         depth: 2,
-        where: { id: { in: input.ids } },
+        where: {
+          and: [
+            { id: { in: input.ids } },
+            { isArchived: { not_equals: true } },
+          ],
+        },
       });
 
       const missingIds = input.ids.filter(
@@ -139,11 +144,11 @@ export const checkoutRouter = createTRPCRouter({
                 equals: tenantSlug,
               },
             },
-            // {
-            //   isArchived: {
-            //     not_equals: true,
-            //   },
-            // },
+            {
+              isArchived: {
+                not_equals: true,
+              },
+            },
           ],
         },
       });

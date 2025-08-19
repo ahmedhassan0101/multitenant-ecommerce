@@ -12,6 +12,7 @@ import Link from "next/link";
 import React, { Fragment } from "react";
 import dynamic from "next/dynamic";
 import { Review } from "@/payload-types";
+import { RichText } from "@payloadcms/richtext-lexical/react";
 // import { CartButton } from "../components/cart-button";
 
 const CartButton = dynamic(
@@ -99,11 +100,7 @@ export default function ProductView({
               {/* Rating for desktop */}
               <div className="hidden lg:flex px-6 py-4 items-center justify-center">
                 <div className="flex items-center gap-2">
-                  <StarRating
-                    rating={data.reviewRating}
-             
-                  />
-           
+                  <StarRating rating={data.reviewRating} />
 
                   <p className="text-base font-medium">
                     {data.reviewCount} ratings
@@ -115,9 +112,7 @@ export default function ProductView({
             {/* Rating for mobile */}
             <div className="block lg:hidden px-6 py-4 items-center justify-center border-b">
               <div className="flex items-center gap-2">
-                <StarRating
-                  rating={data.reviewRating}
-                />
+                <StarRating rating={data.reviewRating} />
                 <p className="text-base font-medium">
                   {data.reviewCount} ratings
                 </p>
@@ -128,9 +123,10 @@ export default function ProductView({
             <div className="p-6 border-b">
               {data.description ? (
                 // <RichText data={data.description} />
-                <p className="font-medium text-muted-foreground italic">
-                  Description: {data.description}
-                </p>
+                // <p className="font-medium text-muted-foreground italic">
+                //   Description: {data.description}
+                // </p>
+                <RichText data={data.description} />
               ) : (
                 <p className="font-medium text-muted-foreground italic">
                   No description provided
