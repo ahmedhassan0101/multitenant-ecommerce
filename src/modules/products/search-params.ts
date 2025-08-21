@@ -1,4 +1,3 @@
-
 import { sortValues } from "@/lib/constants";
 import {
   createLoader,
@@ -8,8 +7,13 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 
-
 export const params = {
+  search: parseAsString
+    .withOptions({
+      clearOnDefault: true,
+    })
+    .withDefault(""),
+
   sort: parseAsStringLiteral(sortValues).withDefault("curated"),
   minPrice: parseAsString.withOptions({ clearOnDefault: true }).withDefault(""),
   maxPrice: parseAsString.withOptions({ clearOnDefault: true }).withDefault(""),
@@ -18,7 +22,7 @@ export const params = {
       clearOnDefault: true,
     })
     .withDefault([]),
-      page: parseAsInteger.withDefault(1),
+  page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(6),
 };
 
