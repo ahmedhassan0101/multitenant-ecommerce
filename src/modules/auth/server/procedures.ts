@@ -146,14 +146,27 @@ interface AuthCookieProps {
 
 const generateAuthCookie = async ({ prefix, value }: AuthCookieProps) => {
   const cookies = await getCookies();
+  // cookies.set({
+  //   name: `${prefix}-token`,
+  //   value,
+  //   httpOnly: true,
+  //   path: "/",
+  //   // TODO: Ensure cross-domain cookie sharing
+  //   // sameSite: "...",
+  //   // domain: "..."
+  //   // secure: "..."
+  // });
   cookies.set({
     name: `${prefix}-token`,
     value,
     httpOnly: true,
     path: "/",
-    // TODO: Ensure cross-domain cookie sharing
-    // sameSite: "none",
-    // domain: ""
+    // Only set the cookie if the environment is not development
+    ...(process.env.NODE_ENV !== "development" && {
+      sameSite: "none",
+      domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+      secure: true,
+    }),
   });
 };
 

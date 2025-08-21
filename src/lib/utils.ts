@@ -29,9 +29,24 @@ export function formatCurrency(value: number | string) {
     maximumFractionDigits: 0, // Round to whole number
   }).format(Number(value)); // Convert value to number and apply formatting
 }
-
+/*
 export function generateTenantURL(tenantSlug: string) {
   return `/tenants/${tenantSlug}`;
+}
+*/
+
+export function generateTenantURL(tenantSlug: string) {
+  const isDevelopment = process.env.NODE_ENV === "development";
+  const isSubdomainRoutingEnabled =
+    process.env.NEXT_PUBLIC_ENABLE_SUBDOMAIN_ROUTING === "true";
+
+  if (isDevelopment || !isSubdomainRoutingEnabled) {
+    return `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${tenantSlug}`;
+  }
+  // const protocol = process.env.NEXT_PUBLIC_FORCE_HTTPS === 'false' ? 'http' : 'https';
+  const protocol = "https";
+  const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
+  return `${protocol}://${tenantSlug}.${domain}`;
 }
 
 export const calculateRatingMetrics = (
