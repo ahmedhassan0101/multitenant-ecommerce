@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { BookmarkCheckIcon, ListFilterIcon, SearchIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CategorySidebar from "./CategorySidebar";
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
@@ -10,12 +10,28 @@ import Link from "next/link";
 
 interface SearchInputProps {
   disabled?: boolean;
+  defaultValue?: string | undefined;
+  onChange?: (value: string) => void;
 }
-export default function SearchInput({ disabled }: SearchInputProps) {
+export default function SearchInput({
+  disabled,
+  defaultValue,
+  onChange,
+}: SearchInputProps) {
+  const [searchValue, setSearchValue] = useState(defaultValue || "");
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const trpc = useTRPC();
   const { data: session } = useQuery(trpc.auth.session.queryOptions());
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onChange?.(searchValue);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchValue, onChange]);
 
   return (
     <div className="flex items-center w-full gap-2">
@@ -29,6 +45,8 @@ export default function SearchInput({ disabled }: SearchInputProps) {
           className="pl-8"
           placeholder="Search products"
           disabled={disabled}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
         />
       </div>
       <Button

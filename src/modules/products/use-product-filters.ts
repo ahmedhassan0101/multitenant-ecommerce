@@ -8,6 +8,11 @@ import {
 } from "nuqs";
 
 const params = {
+  search: parseAsString
+    .withOptions({
+      clearOnDefault: true,
+    })
+    .withDefault(""),
   sort: parseAsStringLiteral(sortValues).withDefault("curated"),
   minPrice: parseAsString.withOptions({ clearOnDefault: true }).withDefault(""),
   maxPrice: parseAsString.withOptions({ clearOnDefault: true }).withDefault(""),

@@ -54,6 +54,7 @@ export const productRouter = createTRPCRouter({
   getAll: baseProcedure
     .input(
       z.object({
+        search: z.string().nullable().optional(),
         categorySlug: z.string().nullable().optional(),
         isSubcategory: z.boolean().default(false),
         minPrice: z.string().nullable().optional(),
@@ -76,6 +77,7 @@ export const productRouter = createTRPCRouter({
         page,
         limit,
         tenantSlug,
+        search,
       } = input;
       const sortValue: Sort = sort ? sortMap[sort] : "-createdAt";
 
@@ -177,6 +179,10 @@ export const productRouter = createTRPCRouter({
         conditions.push({ "tenant.slug": { equals: tenantSlug } });
       } else {
         conditions.push({ isPrivate: { not_equals: true } });
+      }
+
+      if (search) {
+        conditions.push({ name: { like: search } });
       }
 
       // Combine all conditions

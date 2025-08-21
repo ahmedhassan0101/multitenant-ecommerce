@@ -7,6 +7,7 @@ import { useTRPC } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import BreadcrumbNavigation from "./breadcrumbs-navigation";
 import { Category } from "@/payload-types";
+import { useProductFilters } from "@/modules/products/use-product-filters";
 
 export default function SearchFilters() {
   const trpc = useTRPC();
@@ -14,6 +15,8 @@ export default function SearchFilters() {
     data: { docs: categories },
   } = useSuspenseQuery(trpc.categories.getAll.queryOptions());
   const params = useParams();
+
+  const [filter, setFilter] = useProductFilters();
 
   const activeCategory = (params?.category as string | undefined) ?? "all";
 
@@ -31,7 +34,10 @@ export default function SearchFilters() {
       className="flex w-full flex-col gap-4 border-b px-4 py-8 lg:px-12"
       style={{ backgroundColor: activeCategoryColor }}
     >
-      <SearchInput />
+      <SearchInput
+        defaultValue={filter.search}
+        onChange={(value) => setFilter({ search: value })}
+      />
       <div className="hidden lg:block">
         <Categories categories={categories} />
       </div>
