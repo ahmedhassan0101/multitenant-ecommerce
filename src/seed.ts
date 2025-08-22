@@ -6,31 +6,34 @@ import { stripe } from "./lib/stripe";
 async function seed() {
   try {
     const payload = await getPayload({ config });
-// Create admin Stripe account
+    // Create admin Stripe account
     const adminAccount = await stripe.accounts.create({});
-    // Create admin tenant
-    // This is the root tenant used to isolate super-admin resources.
-    // All system-level or tenant-agnostic features should be scoped under this tenant.
+    /* 
+    Create admin tenant
+    This is the root tenant used to isolate super-admin resources.
+    All system-level or tenant-agnostic features should be scoped under this tenant.
+    */
     const adminTenant = await payload.create({
       collection: "tenants",
       data: {
-        name: "admin", // Human-readable name of the tenant
-        slug: "admin", // Used for routing or subdomain mapping
-        stripeAccountId: adminAccount.id, // Use the admin Stripe account ID
+        name: "admin",
+        slug: "admin",
+        stripeAccountId: adminAccount.id,
       },
     });
-
-    // Create admin user
-    // This user acts as the global super-admin for the platform.
-    // Has elevated privileges and is linked to the admin tenant for top-level access.
+    /* 
+    Create admin user
+    This user acts as the global super-admin for the platform.
+    Has elevated privileges and is linked to the admin tenant for top-level access.
+    */
     await payload.create({
       collection: "users",
       data: {
-        username: "admin", // Username used for internal identification or display
-        email: "admin@demo.com", // Admin's login email
-        password: "demo", // Admin's initial password (should be updated in production)
-        roles: ["super-admin"], // Assign the highest-level role for unrestricted access
-        tenants: [{ tenant: adminTenant.id }], // Link the admin user to the admin tenant
+        username: "admin",
+        email: "admin@demo.com",
+        password: "demo",
+        roles: ["super-admin"],
+        tenants: [{ tenant: adminTenant.id }],
       },
     });
 

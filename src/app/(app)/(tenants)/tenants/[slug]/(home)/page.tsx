@@ -5,7 +5,7 @@ import { loadProductFilters } from "@/modules/products/search-params";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import ProductListView from "@/modules/products/ui/views/product-list-view";
 import { getQueryClient, trpc } from "@/trpc/server";
-
+export const dynamic = "force-dynamic";
 type Props = {
   params: Promise<{ slug: string }>; 
   searchParams: Promise<SearchParams>; // URL query params (minPrice, maxPrice, tags, etc.)

@@ -1,10 +1,10 @@
-import { DEFAULT_LIMIT } from "@/lib/constants";
+// import { DEFAULT_LIMIT } from "@/lib/constants";
 import { loadProductFilters } from "@/modules/products/search-params";
 import ProductListView from "@/modules/products/ui/views/product-list-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-
+export const dynamic = "force-dynamic";
 interface Props {
   params: Promise<{
     subcategory: string;

@@ -10,11 +10,9 @@ interface HomeProps {
 
 export default async function HomePage({ searchParams }: HomeProps) {
   const filters = await loadProductFilters(searchParams);
-  // const resolvedSearchParams = await searchParams;
 
   const queryClient = getQueryClient();
   try {
-    // Prefetch products for this parent category (includes subcategories)
     void queryClient.prefetchQuery(
       trpc.products.getAll.queryOptions({
         ...filters,
