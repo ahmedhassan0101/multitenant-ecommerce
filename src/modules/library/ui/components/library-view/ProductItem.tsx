@@ -3,6 +3,7 @@ import { Media, Product, Tenant } from "@/payload-types";
 import { PackageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { RichText } from "@payloadcms/richtext-lexical/react";
 interface ProductItemProps {
   product: Product;
 }
@@ -35,16 +36,17 @@ export const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           <h5 className="font-medium text-gray-900 truncate mb-1">
             {product.name}
           </h5>
-          <p className="text-sm text-gray-500 truncate">
-            {product.description}
-          </p>
+          {product.description && (
+            <p className="text-sm text-gray-500 truncate">
+              {/* {product.description} */}
+              <RichText data={product.description} />
+            </p>
+          )}
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm font-medium text-gray-900">
               {formatCurrency(product.price)}
             </span>
-              <span className="text-xs text-gray-500">
-                by {tenant.name}
-              </span>
+            <span className="text-xs text-gray-500">by {tenant.name}</span>
           </div>
         </div>
       </div>
