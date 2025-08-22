@@ -2,7 +2,7 @@ import ProductView, { ProductViewSkeleton } from "@/modules/products/ui/views/pr
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import React, { Suspense } from "react";
-
+export const dynamic = "force-dynamic";
 type Props = {
   params: Promise<{ productId: string; slug: string }>;
 };

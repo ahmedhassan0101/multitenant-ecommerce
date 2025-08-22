@@ -8,14 +8,12 @@ import Navbar from "@/modules/home/ui/Navbar";
 import Footer from "@/modules/home/ui/Footer";
 import { Suspense } from "react";
 
-//  prefetchQuery approach
+
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-  
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.categories.getAll.queryOptions());
 
@@ -33,27 +31,20 @@ export default async function Layout({
   );
 }
 
+/* 
+  let data = null;
+  let error = null;
 
-
-
-// let data = null;
-//   let error = null;
-
-//   try {
-//     const response = await fetch("http://localhost:3000/my-route", {
-//       cache: "no-store",
-//     });
-//     if (!response.ok) throw new Error("Error");
-//     data = await response.json();
-//   } catch (err) {
-//     error = err instanceof Error ? err.message : "خطأ غير معروف";
-//     console.log(error);
-//   }
-// Because of depth 1, we are confident doc will be a type of Category
-// const formattedData = data.docs.map((doc: Category) => ({
-//   ...doc,
-//   subcategories: (doc.subcategories?.docs ?? []).map((doc) => ({
-//     ...(doc as Category),
-//   })),
-// }));
-// console.log("data: 50 50" + JSON.stringify(data, null, 2));
+  try {
+    const response = await fetch("http://localhost:3000/my-route", {
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Error");
+    data = await response.json();
+  } catch (err) {
+    error = err instanceof Error ? err.message : "unknown error";
+    console.log(error);
+  }
+console.log("data: 50 50" + JSON.stringify(data, null, 2));
+}));
+*/

@@ -7,7 +7,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React, { Suspense } from "react";
-
+export const dynamic = "force-dynamic";
 type Props = {
   params: Promise<{
     orderId: string;

@@ -18,9 +18,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // This pattern applies middleware to all routes
-    // except routes that start with
-    // api, _next, _static, _vercel, media, or any file containing a dot (such as favicon.ico)
+    /*
+    This pattern applies middleware to all routes
+    except routes that start with
+    api, _next, _static, _vercel, media, or any file containing a dot (such as favicon.ico)
+     */
     "/((?!api/|_next/|_static/|_vercel|media/|[\\w-]+\\.\\w+).*)",
   ],
 };
