@@ -36,7 +36,6 @@ export default function Navbar() {
 
   const { data: session } = useQuery(trpc.auth.session.queryOptions());
 
-  console.log("🚀 ~ Navbar ~ session:", JSON.stringify(session?.user, null, 2));
 
   const logoutMutation = useMutation(
     trpc.auth.logout.mutationOptions({

@@ -14,11 +14,21 @@ export const authRouter = createTRPCRouter({
   session: baseProcedure.query(async ({ ctx }) => {
     const headers = await getHeaders();
 
+    // console.log("🔍 Session Check:", {
+    //   host: headers.get("host"),
+    //   cookie: headers.get("cookie"),
+    //   userAgent: headers.get("user-agent"),
+    // });
     // const headersObj = Object.fromEntries(headers.entries());
     const session = await ctx.payload.auth({ headers });
 
     // console.log("📦 Headers:", JSON.stringify(headersObj, null, 2));
     // console.log("👤 Session:", JSON.stringify(session, null, 2));
+
+    // console.log("👤 Session Result:", {
+    //   hasUser: !!session.user,
+    //   userId: session.user?.id,
+    // });
 
     return session;
   }),
@@ -146,27 +156,29 @@ interface AuthCookieProps {
 
 const generateAuthCookie = async ({ prefix, value }: AuthCookieProps) => {
   const cookies = await getCookies();
-  // cookies.set({
-  //   name: `${prefix}-token`,
-  //   value,
-  //   httpOnly: true,
-  //   path: "/",
-  //   // TODO: Ensure cross-domain cookie sharing
-  //   // sameSite: "...",
-  //   // domain: "..."
-  //   // secure: "..."
-  // });
+
   cookies.set({
+    // name: `${prefix}-token`,
+    // value,
+    // httpOnly: true,
+    // path: "/",
+    // // Only set the cookie if the environment is not development
+    // ...(process.env.NODE_ENV !== "development" && {
+    //   sameSite: "none",
+    //   domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+    //   secure: true,
+    // }),
     name: `${prefix}-token`,
     value,
     httpOnly: true,
     path: "/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     // Only set the cookie if the environment is not development
-    ...(process.env.NODE_ENV !== "development" && {
-      sameSite: "none",
-      domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
-      secure: true,
-    }),
+    ...(process.env.NODE_ENV === "production" &&
+      process.env.NEXT_PUBLIC_ROOT_DOMAIN && {
+        domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+      }),
   });
 };
 

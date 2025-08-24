@@ -45,11 +45,17 @@ export const Users: CollectionConfig = {
   // auth: true,
   auth: {
     cookies: {
-      ...(process.env.NODE_ENV !== "development" && {
-        sameSite: "None",
-        domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
-        secure: true,
-      }),
+      // ...(process.env.NODE_ENV !== "development" && {
+      //   sameSite: "None",
+      //   domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+      //   secure: true,
+      // }),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      ...(process.env.NODE_ENV === "production" &&
+        process.env.NEXT_PUBLIC_ROOT_DOMAIN && {
+          domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+        }),
     },
   },
   fields: [
