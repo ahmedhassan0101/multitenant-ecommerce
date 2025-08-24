@@ -36,6 +36,8 @@ export default function Navbar() {
 
   const { data: session } = useQuery(trpc.auth.session.queryOptions());
 
+  console.log("🚀 ~ Navbar ~ session:", JSON.stringify(session?.user, null, 2));
+
   const logoutMutation = useMutation(
     trpc.auth.logout.mutationOptions({
       onSuccess: async () => {
@@ -78,7 +80,7 @@ export default function Navbar() {
       {session?.user ? (
         <div className="hidden lg:flex">
           <p className="h-full px-12 text-xl font-bold border-l flex items-center  hover:bg-pink-400">
-           User: {session.user.username}
+            User: {session.user.username}
           </p>
           <Button
             onClick={handleLogout}
