@@ -42,16 +42,16 @@ export const Users: CollectionConfig = {
     useAsTitle: "email",
     hidden: ({ user }) => !isSuperAdmin(user), // Hide the users collection from non-super admins
   },
-  auth: true,
-  //  auth: {
-  //   cookies: {
-  //     ...(process.env.NODE_ENV !== "development" && {
-  //       sameSite: "None",
-  //       domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
-  //       secure: true,
-  //     }),
-  //   },
-  // },
+  // auth: true,
+  auth: {
+    cookies: {
+      ...(process.env.NODE_ENV !== "development" && {
+        sameSite: "None",
+        domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+        secure: true,
+      }),
+    },
+  },
   fields: [
     {
       name: "username",
